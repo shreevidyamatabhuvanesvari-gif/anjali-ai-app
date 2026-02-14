@@ -11,9 +11,10 @@
 <div class="chat-container">
 
     <div class="header">
-        <h2>अंजली 💖</h2>
-        <p>तुमसे बात करके अच्छा लगता है…</p>
-    </div>
+    <h2>अंजली 💖</h2>
+    <p>तुमसे बात करके अच्छा लगता है…</p>
+    <button class="admin-btn" onclick="goToAdmin()">Admin Panel</button>
+</div>
 
     <div id="chatBox" class="chat-box"></div>
 
@@ -25,6 +26,11 @@
     </div>
 
 </div>
+    <script>
+function goToAdmin() {
+    window.location.href = "admin.html";
+}
+    </script>
 
 <script src="js/script.js"></script>
 
