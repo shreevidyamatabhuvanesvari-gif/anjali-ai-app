@@ -3,26 +3,35 @@ function detectName(userText) {
     let text = userText.trim();
     let name = null;
 
-    // मेरा नाम राहुल है
+    // Emotion words — ये कभी नाम नहीं बनेंगे
+    const banned = ["उदास","खुश","दुखी","गुस्सा","परेशान","थका","अकेला","ठीक"];
+
+    // 1️⃣ मेरा नाम राहुल है
     if (text.startsWith("मेरा नाम")) {
         name = text.replace("मेरा नाम", "")
                    .replace("है", "")
                    .trim();
     }
 
-    // मैं राहुल हूँ
-    else if (text.startsWith("मैं ")) {
+    // 2️⃣ मैं राहुल हूँ
+    else if (text.startsWith("मैं ") && text.includes("हूँ")) {
         name = text.replace("मैं", "")
                    .replace("हूँ", "")
-                   .replace("हू", "")
                    .trim();
     }
 
-    // ❌ single-word rule हटा दिया गया
+    // अगर नाम मिला
+    if (name) {
 
-    if (name && name.length > 1 && name.length < 20) {
-        MemoryEngine.setName(name);
-        return name;
+        // banned words check
+        if (banned.includes(name)) {
+            return null;
+        }
+
+        if (name.length > 1 && name.length < 20) {
+            MemoryEngine.setName(name);
+            return name;
+        }
     }
 
     return null;
