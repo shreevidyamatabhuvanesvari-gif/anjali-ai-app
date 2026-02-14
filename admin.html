@@ -8,56 +8,58 @@
 
 <body>
 
-<div class="admin-container">
+<div class="page-center">
+    <div class="admin-container">
 
-    <h2>अंजली AI – Admin Panel ⚙️</h2>
+        <h2>अंजली AI – Admin Panel ⚙️</h2>
 
-    <div class="section">
-        <h3>Personality Settings</h3>
-        <textarea id="personalityText" rows="6">
+        <div class="section">
+            <h3>Personality Settings</h3>
+            <textarea id="personalityText" rows="6">
 तुम अंजली नाम की एक romantic, caring और funny लड़की हो।
 तुम शुद्ध हिन्दी में बात करती हो।
 तुम user को नाम से बुलाती हो।
 तुम भावनात्मक सहारा देती हो।
-        </textarea>
-        <button onclick="savePersonality()">Save Personality</button>
-    </div>
-
-    <div class="section">
-        <h3>Emotion Engine</h3>
-        <select id="emotionLevel">
-            <option>Basic</option>
-            <option selected>Advanced</option>
-        </select>
-        <button onclick="saveEmotion()">Update Emotion Mode</button>
-    </div>
-
-    <div class="section">
-        <h3>Learning System</h3>
-        <select id="learningMode">
-            <option>ON</option>
-            <option>OFF</option>
-        </select>
-        <button onclick="saveLearning()">Save Learning Mode</button>
-    </div>
-
-    <div class="section">
-        <h3>Voice Style</h3>
-        <select id="voiceStyle">
-            <option>Soft Female</option>
-            <option selected>Cute Female</option>
-            <option>Mature Female</option>
-        </select>
-        <button onclick="saveVoice()">Update Voice</button>
-    </div>
-
-    <div class="section">
-        <h3>System Logs</h3>
-        <div id="logsBox" class="logs-box">
-            Logs will appear here...
+            </textarea>
+            <button onclick="savePersonality()">Save Personality</button>
         </div>
-    </div>
 
+        <div class="section">
+            <h3>Emotion Engine</h3>
+            <select id="emotionLevel">
+                <option>Basic</option>
+                <option selected>Advanced</option>
+            </select>
+            <button onclick="saveEmotion()">Update Emotion Mode</button>
+        </div>
+
+        <div class="section">
+            <h3>Learning System</h3>
+            <select id="learningMode">
+                <option>ON</option>
+                <option>OFF</option>
+            </select>
+            <button onclick="saveLearning()">Save Learning Mode</button>
+        </div>
+
+        <div class="section">
+            <h3>Voice Style</h3>
+            <select id="voiceStyle">
+                <option>Soft Female</option>
+                <option selected>Cute Female</option>
+                <option>Mature Female</option>
+            </select>
+            <button onclick="saveVoice()">Update Voice</button>
+        </div>
+
+        <div class="section">
+            <h3>System Logs</h3>
+            <div id="logsBox" class="logs-box">
+                Logs will appear here...
+            </div>
+        </div>
+
+    </div>
 </div>
 
 <script src="js/admin.js"></script>
