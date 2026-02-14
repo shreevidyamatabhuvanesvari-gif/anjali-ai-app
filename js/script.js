@@ -1,7 +1,6 @@
 const chatBox = document.getElementById("chatBox");
 const input = document.getElementById("userInput");
 
-/* Chat bubble add करने का function */
 function addMessage(text, sender) {
     const msg = document.createElement("div");
     msg.className = "msg " + sender;
@@ -11,7 +10,6 @@ function addMessage(text, sender) {
     msg.style.padding = "10px";
     msg.style.borderRadius = "10px";
     msg.style.maxWidth = "75%";
-    msg.style.display = "block";
 
     if (sender === "user") {
         msg.style.background = "#ffd6e7";
@@ -26,9 +24,7 @@ function addMessage(text, sender) {
     chatBox.scrollTop = chatBox.scrollHeight;
 }
 
-/* ===========================
-   MAIN SEND MESSAGE (Brain call)
-   =========================== */
+/* ===== MAIN SEND ===== */
 async function sendMessage() {
     const text = input.value.trim();
     if (text === "") return;
@@ -37,43 +33,40 @@ async function sendMessage() {
     input.value = "";
 
     try {
-        // 🧠 Local Private Brain Call
+        console.log("Sending to brain:", text);
+
         const reply = await Brain.respond(text);
+
+        console.log("Brain reply:", reply);
 
         addMessage(reply, "bot");
         speak(reply);
 
     } catch (err) {
-        const fallback = "मैं अभी ठीक से जवाब नहीं दे पा रही… थोड़ी देर बाद फिर कोशिश करो।";
-        addMessage(fallback, "bot");
-        speak(fallback);
+        console.error("BRAIN ERROR:", err);
+
+        addMessage("⚠️ Error: " + err.message, "bot");
     }
 }
 
-/* Enter key support */
+/* Enter key */
 input.addEventListener("keypress", function(e) {
     if (e.key === "Enter") {
         sendMessage();
     }
 });
 
-/* ===========================
-   🎤 TEMPORARY STT (Mic Input)
-   =========================== */
+/* 🎤 STT */
 function startListening() {
-
     const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
 
     if (!SpeechRecognition) {
-        alert("आपके browser में voice input support नहीं है");
+        alert("Voice input support नहीं है");
         return;
     }
 
     const recognition = new SpeechRecognition();
     recognition.lang = "hi-IN";
-    recognition.continuous = false;
-    recognition.interimResults = false;
-
     recognition.start();
 
     recognition.onresult = function(event) {
@@ -81,27 +74,17 @@ function startListening() {
         input.value = speechText;
         sendMessage();
     };
-
-    recognition.onerror = function() {
-        alert("Voice recognition error");
-    };
 }
 
-/* ===========================
-   🔊 TEMPORARY TTS
-   =========================== */
+/* 🔊 TTS */
 function speak(text) {
-
     if (!window.speechSynthesis) return;
 
     const speech = new SpeechSynthesisUtterance();
     speech.text = text;
     speech.lang = "hi-IN";
-
-    // Soft + cute tone
     speech.rate = 0.9;
-    speech.pitch = 1.2;
-    speech.volume = 1;
+    speech.pitch = 1.1;
 
     window.speechSynthesis.speak(speech);
-}
+        }
