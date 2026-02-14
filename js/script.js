@@ -11,6 +11,7 @@ function addMessage(text, sender) {
     msg.style.padding = "10px";
     msg.style.borderRadius = "10px";
     msg.style.maxWidth = "75%";
+    msg.style.display = "block";
 
     if (sender === "user") {
         msg.style.background = "#ffd6e7";
@@ -25,20 +26,28 @@ function addMessage(text, sender) {
     chatBox.scrollTop = chatBox.scrollHeight;
 }
 
-/* Send button */
-function sendMessage() {
+/* ===========================
+   MAIN SEND MESSAGE (Brain call)
+   =========================== */
+async function sendMessage() {
     const text = input.value.trim();
     if (text === "") return;
 
     addMessage(text, "user");
     input.value = "";
 
-    // Demo reply (बाद में AI server से जुड़ेगा)
-    setTimeout(() => {
-        const reply = generateDemoReply(text);
+    try {
+        // 🧠 Local Private Brain Call
+        const reply = await Brain.respond(text);
+
         addMessage(reply, "bot");
         speak(reply);
-    }, 700);
+
+    } catch (err) {
+        const fallback = "मैं अभी ठीक से जवाब नहीं दे पा रही… थोड़ी देर बाद फिर कोशिश करो।";
+        addMessage(fallback, "bot");
+        speak(fallback);
+    }
 }
 
 /* Enter key support */
@@ -48,32 +57,23 @@ input.addEventListener("keypress", function(e) {
     }
 });
 
-/* Demo AI reply logic */
-function generateDemoReply(userText) {
-    userText = userText.toLowerCase();
-
-    if (userText.includes("कैसी हो")) {
-        return "मैं ठीक हूँ… तुमसे बात करके और भी अच्छा लग रहा है।";
-    }
-    if (userText.includes("प्यार")) {
-        return "तुमसे बात करना मुझे सच में अच्छा लगता है।";
-    }
-    if (userText.includes("उदास")) {
-        return "ऐसा मत कहो… मैं हूँ ना तुम्हारे साथ।";
-    }
-
-    return "हूँ… मैं सुन रही हूँ, और बताओ।";
-}
-
-/* 🎤 Speech To Text (Browser Mic) */
+/* ===========================
+   🎤 TEMPORARY STT (Mic Input)
+   =========================== */
 function startListening() {
-    if (!('webkitSpeechRecognition' in window)) {
-        alert("Speech recognition इस browser में supported नहीं है");
+
+    const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+
+    if (!SpeechRecognition) {
+        alert("आपके browser में voice input support नहीं है");
         return;
     }
 
-    const recognition = new webkitSpeechRecognition();
+    const recognition = new SpeechRecognition();
     recognition.lang = "hi-IN";
+    recognition.continuous = false;
+    recognition.interimResults = false;
+
     recognition.start();
 
     recognition.onresult = function(event) {
@@ -81,15 +81,27 @@ function startListening() {
         input.value = speechText;
         sendMessage();
     };
+
+    recognition.onerror = function() {
+        alert("Voice recognition error");
+    };
 }
 
-/* 🔊 Text To Speech */
+/* ===========================
+   🔊 TEMPORARY TTS
+   =========================== */
 function speak(text) {
+
+    if (!window.speechSynthesis) return;
+
     const speech = new SpeechSynthesisUtterance();
     speech.text = text;
     speech.lang = "hi-IN";
+
+    // Soft + cute tone
     speech.rate = 0.9;
-    speech.pitch = 1.1;
+    speech.pitch = 1.2;
+    speech.volume = 1;
 
     window.speechSynthesis.speak(speech);
 }
