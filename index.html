@@ -4,29 +4,99 @@
     <meta charset="UTF-8">
     <title>अंजली – AI साथी</title>
     <link rel="stylesheet" href="css/style.css">
+
+    <style>
+        /* Direct body centering */
+        body {
+            margin: 0;
+            height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: linear-gradient(135deg, #ffd6e7, #ffeef6);
+            font-family: Arial, sans-serif;
+        }
+
+        .chat-container {
+            width: 380px;
+            height: 600px;
+            background: white;
+            border-radius: 18px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+
+        .header {
+            background: #ff6fa5;
+            color: white;
+            padding: 15px;
+            text-align: center;
+            position: relative;
+        }
+
+        .admin-btn {
+            position: absolute;
+            right: 10px;
+            top: 10px;
+            background: white;
+            border: none;
+            padding: 5px 10px;
+            border-radius: 8px;
+            cursor: pointer;
+        }
+
+        .chat-box {
+            flex: 1;
+            padding: 10px;
+            overflow-y: auto;
+            background: #fff0f6;
+        }
+
+        .input-area {
+            display: flex;
+            padding: 10px;
+            border-top: 1px solid #eee;
+        }
+
+        .input-area input {
+            flex: 1;
+            padding: 10px;
+            border-radius: 10px;
+            border: 1px solid #ccc;
+        }
+
+        .input-area button {
+            margin-left: 6px;
+            padding: 10px 12px;
+            border: none;
+            background: #ff6fa5;
+            color: white;
+            border-radius: 10px;
+            cursor: pointer;
+        }
+    </style>
 </head>
 
 <body>
 
-<div class="page-center">
-    <div class="chat-container">
+<div class="chat-container">
 
-        <div class="header">
-            <h2>अंजली 💖</h2>
-            <p>तुमसे बात करके अच्छा लगता है…</p>
-
-            <button class="admin-btn" onclick="goToAdmin()">Admin</button>
-        </div>
-
-        <div id="chatBox" class="chat-box"></div>
-
-        <div class="input-area">
-            <input type="text" id="userInput" placeholder="अंजली से बात करें..." />
-            <button onclick="startListening()">🎤</button>
-            <button onclick="sendMessage()">Send</button>
-        </div>
-
+    <div class="header">
+        <h2>अंजली 💖</h2>
+        <p>तुमसे बात करके अच्छा लगता है…</p>
+        <button class="admin-btn" onclick="goToAdmin()">Admin</button>
     </div>
+
+    <div id="chatBox" class="chat-box"></div>
+
+    <div class="input-area">
+        <input type="text" id="userInput" placeholder="अंजली से बात करें..." />
+        <button onclick="startListening()">🎤</button>
+        <button onclick="sendMessage()">Send</button>
+    </div>
+
 </div>
 
 <script>
