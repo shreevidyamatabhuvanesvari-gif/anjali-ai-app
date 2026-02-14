@@ -4,62 +4,130 @@
     <meta charset="UTF-8">
     <title>Admin Panel - अंजली AI</title>
     <link rel="stylesheet" href="css/style.css">
+
+    <style>
+        /* Direct perfect center */
+        body {
+            margin: 0;
+            height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: linear-gradient(135deg, #ffd6e7, #ffeef6);
+            font-family: Arial, sans-serif;
+        }
+
+        .admin-container {
+            width: 420px;
+            max-height: 90vh;
+            background: white;
+            border-radius: 18px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+            padding: 20px;
+            overflow-y: auto;
+        }
+
+        h2 {
+            text-align: center;
+            margin-bottom: 15px;
+        }
+
+        .section {
+            margin-bottom: 18px;
+        }
+
+        .section h3 {
+            margin-bottom: 6px;
+            color: #ff6fa5;
+        }
+
+        textarea {
+            width: 100%;
+            padding: 8px;
+            border-radius: 10px;
+            border: 1px solid #ccc;
+        }
+
+        select {
+            width: 100%;
+            padding: 8px;
+            margin-top: 6px;
+            border-radius: 10px;
+            border: 1px solid #ccc;
+        }
+
+        button {
+            margin-top: 8px;
+            padding: 8px 12px;
+            border: none;
+            background: #ff6fa5;
+            color: white;
+            border-radius: 10px;
+            cursor: pointer;
+        }
+
+        .logs-box {
+            background: #fff0f6;
+            height: 120px;
+            padding: 10px;
+            border-radius: 10px;
+            overflow-y: auto;
+        }
+    </style>
 </head>
 
 <body>
 
-<div class="page-center">
-    <div class="admin-container">
+<div class="admin-container">
 
-        <h2>अंजली AI – Admin Panel ⚙️</h2>
+    <h2>अंजली AI – Admin Panel ⚙️</h2>
 
-        <div class="section">
-            <h3>Personality Settings</h3>
-            <textarea id="personalityText" rows="6">
+    <div class="section">
+        <h3>Personality Settings</h3>
+        <textarea id="personalityText" rows="6">
 तुम अंजली नाम की एक romantic, caring और funny लड़की हो।
 तुम शुद्ध हिन्दी में बात करती हो।
 तुम user को नाम से बुलाती हो।
 तुम भावनात्मक सहारा देती हो।
-            </textarea>
-            <button onclick="savePersonality()">Save Personality</button>
-        </div>
-
-        <div class="section">
-            <h3>Emotion Engine</h3>
-            <select id="emotionLevel">
-                <option>Basic</option>
-                <option selected>Advanced</option>
-            </select>
-            <button onclick="saveEmotion()">Update Emotion Mode</button>
-        </div>
-
-        <div class="section">
-            <h3>Learning System</h3>
-            <select id="learningMode">
-                <option>ON</option>
-                <option>OFF</option>
-            </select>
-            <button onclick="saveLearning()">Save Learning Mode</button>
-        </div>
-
-        <div class="section">
-            <h3>Voice Style</h3>
-            <select id="voiceStyle">
-                <option>Soft Female</option>
-                <option selected>Cute Female</option>
-                <option>Mature Female</option>
-            </select>
-            <button onclick="saveVoice()">Update Voice</button>
-        </div>
-
-        <div class="section">
-            <h3>System Logs</h3>
-            <div id="logsBox" class="logs-box">
-                Logs will appear here...
-            </div>
-        </div>
-
+        </textarea>
+        <button onclick="savePersonality()">Save Personality</button>
     </div>
+
+    <div class="section">
+        <h3>Emotion Engine</h3>
+        <select id="emotionLevel">
+            <option>Basic</option>
+            <option selected>Advanced</option>
+        </select>
+        <button onclick="saveEmotion()">Update Emotion Mode</button>
+    </div>
+
+    <div class="section">
+        <h3>Learning System</h3>
+        <select id="learningMode">
+            <option>ON</option>
+            <option>OFF</option>
+        </select>
+        <button onclick="saveLearning()">Save Learning Mode</button>
+    </div>
+
+    <div class="section">
+        <h3>Voice Style</h3>
+        <select id="voiceStyle">
+            <option>Soft Female</option>
+            <option selected>Cute Female</option>
+            <option>Mature Female</option>
+        </select>
+        <button onclick="saveVoice()">Update Voice</button>
+    </div>
+
+    <div class="section">
+        <h3>System Logs</h3>
+        <div id="logsBox" class="logs-box">
+            Logs will appear here...
+        </div>
+    </div>
+
 </div>
 
 <script src="js/admin.js"></script>
