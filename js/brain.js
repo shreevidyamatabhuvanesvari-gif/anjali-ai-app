@@ -35,4 +35,4 @@ function detectName(userText) {
     }
 
     return null;
-}();
+}
