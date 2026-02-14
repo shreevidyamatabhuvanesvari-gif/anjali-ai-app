@@ -1,0 +1,149 @@
+/* Reset */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: "Segoe UI", sans-serif;
+}
+
+/* Body Center Alignment */
+body {
+    background: linear-gradient(135deg, #ffd6e7, #ffe9f2);
+    height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+/* Chat Container (Index Page) */
+.chat-container {
+    width: 380px;
+    height: 600px;
+    background: white;
+    border-radius: 20px;
+    box-shadow: 0 8px 25px rgba(0,0,0,0.15);
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+}
+
+/* Header */
+.header {
+    background: #ff6fa5;
+    color: white;
+    padding: 15px;
+    text-align: center;
+    position: relative;
+}
+
+.header h2 {
+    margin-bottom: 5px;
+}
+
+/* Admin Button */
+.admin-btn {
+    position: absolute;
+    right: 10px;
+    top: 10px;
+    background: white;
+    color: #ff6fa5;
+    border: none;
+    padding: 5px 10px;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 12px;
+}
+
+/* Chat Box */
+.chat-box {
+    flex: 1;
+    padding: 15px;
+    overflow-y: auto;
+    background: #fff0f6;
+}
+
+/* Input Area */
+.input-area {
+    display: flex;
+    padding: 10px;
+    background: #fff;
+    border-top: 1px solid #eee;
+}
+
+.input-area input {
+    flex: 1;
+    padding: 10px;
+    border-radius: 10px;
+    border: 1px solid #ddd;
+    outline: none;
+}
+
+.input-area button {
+    margin-left: 8px;
+    padding: 10px 12px;
+    border: none;
+    background: #ff6fa5;
+    color: white;
+    border-radius: 10px;
+    cursor: pointer;
+}
+
+/* Admin Panel Container */
+.admin-container {
+    width: 420px;
+    max-height: 90vh;
+    background: white;
+    border-radius: 20px;
+    box-shadow: 0 8px 25px rgba(0,0,0,0.15);
+    padding: 20px;
+    overflow-y: auto;
+}
+
+/* Admin Sections */
+.section {
+    margin-bottom: 20px;
+}
+
+.section h3 {
+    margin-bottom: 8px;
+    color: #ff6fa5;
+}
+
+/* Textarea */
+textarea {
+    width: 100%;
+    padding: 10px;
+    border-radius: 10px;
+    border: 1px solid #ddd;
+    margin-top: 5px;
+}
+
+/* Select */
+select {
+    width: 100%;
+    padding: 8px;
+    border-radius: 10px;
+    border: 1px solid #ddd;
+    margin-top: 5px;
+}
+
+/* Admin Buttons */
+.section button {
+    margin-top: 8px;
+    padding: 8px 12px;
+    background: #ff6fa5;
+    color: white;
+    border: none;
+    border-radius: 10px;
+    cursor: pointer;
+}
+
+/* Logs Box */
+.logs-box {
+    background: #fff0f6;
+    height: 120px;
+    border-radius: 10px;
+    padding: 10px;
+    overflow-y: auto;
+    font-size: 13px;
+  }
