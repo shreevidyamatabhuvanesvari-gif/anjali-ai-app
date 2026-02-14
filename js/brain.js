@@ -6,14 +6,14 @@ function detectName(userText) {
     // Emotion words — ये कभी नाम नहीं बनेंगे
     const banned = ["उदास","खुश","दुखी","गुस्सा","परेशान","थका","अकेला","ठीक"];
 
-    // 1️⃣ मेरा नाम राहुल है
+    // 1️⃣ मेरा नाम अनुज है
     if (text.startsWith("मेरा नाम")) {
         name = text.replace("मेरा नाम", "")
                    .replace("है", "")
                    .trim();
     }
 
-    // 2️⃣ मैं राहुल हूँ
+    // 2️⃣ मैं अनुज हूँ
     else if (text.startsWith("मैं ") && text.includes("हूँ")) {
         name = text.replace("मैं", "")
                    .replace("हूँ", "")
