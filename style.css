@@ -3,32 +3,31 @@
     margin: 0;
     padding: 0;
     box-sizing: border-box;
-    font-family: "Segoe UI", sans-serif;
 }
-.page-center {
+
+/* Full screen center */
+html, body {
+    height: 100%;
     width: 100%;
-    height: 100vh;
+    font-family: Arial, sans-serif;
+}
+
+/* Perfect center system */
+.page-center {
+    min-height: 100vh;
     display: flex;
     align-items: center;
     justify-content: center;
+    background: linear-gradient(135deg, #ffd6e7, #ffeef6);
 }
 
-/* Body Center Alignment */
-body {
-    background: linear-gradient(135deg, #ffd6e7, #ffe9f2);
-    height: 100vh;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-}
-
-/* Chat Container (Index Page) */
+/* Chat Container */
 .chat-container {
     width: 380px;
     height: 600px;
     background: white;
-    border-radius: 20px;
-    box-shadow: 0 8px 25px rgba(0,0,0,0.15);
+    border-radius: 18px;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.2);
     display: flex;
     flex-direction: column;
     overflow: hidden;
@@ -43,37 +42,30 @@ body {
     position: relative;
 }
 
-.header h2 {
-    margin-bottom: 5px;
-}
-
 /* Admin Button */
 .admin-btn {
     position: absolute;
     right: 10px;
     top: 10px;
     background: white;
-    color: #ff6fa5;
     border: none;
     padding: 5px 10px;
     border-radius: 8px;
     cursor: pointer;
-    font-size: 12px;
 }
 
-/* Chat Box */
+/* Chat Area */
 .chat-box {
     flex: 1;
-    padding: 15px;
-    overflow-y: auto;
+    padding: 10px;
     background: #fff0f6;
+    overflow-y: auto;
 }
 
 /* Input Area */
 .input-area {
     display: flex;
     padding: 10px;
-    background: #fff;
     border-top: 1px solid #eee;
 }
 
@@ -81,76 +73,43 @@ body {
     flex: 1;
     padding: 10px;
     border-radius: 10px;
-    border: 1px solid #ddd;
-    outline: none;
+    border: 1px solid #ccc;
 }
 
 .input-area button {
-    margin-left: 8px;
+    margin-left: 5px;
     padding: 10px 12px;
     border: none;
     background: #ff6fa5;
     color: white;
     border-radius: 10px;
-    cursor: pointer;
 }
 
-/* Admin Panel Container */
+/* Admin Panel */
 .admin-container {
     width: 420px;
-    max-height: 90vh;
     background: white;
-    border-radius: 20px;
-    box-shadow: 0 8px 25px rgba(0,0,0,0.15);
+    border-radius: 18px;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.2);
     padding: 20px;
-    overflow-y: auto;
 }
 
-/* Admin Sections */
+/* Sections */
 .section {
     margin-bottom: 20px;
 }
 
-.section h3 {
-    margin-bottom: 8px;
-    color: #ff6fa5;
-}
-
-/* Textarea */
-textarea {
-    width: 100%;
-    padding: 10px;
-    border-radius: 10px;
-    border: 1px solid #ddd;
-    margin-top: 5px;
-}
-
-/* Select */
-select {
+textarea, select {
     width: 100%;
     padding: 8px;
-    border-radius: 10px;
-    border: 1px solid #ddd;
-    margin-top: 5px;
+    margin-top: 6px;
 }
 
-/* Admin Buttons */
 .section button {
-    margin-top: 8px;
+    margin-top: 6px;
     padding: 8px 12px;
     background: #ff6fa5;
-    color: white;
     border: none;
-    border-radius: 10px;
-    cursor: pointer;
+    color: white;
+    border-radius: 8px;
 }
-
-/* Logs Box */
-.logs-box {
-    background: #fff0f6;
-    height: 120px;
-    border-radius: 10px;
-    padding: 10px;
-    overflow-y: auto;
-    font-size: 13px;
-  }
