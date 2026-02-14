@@ -19,19 +19,49 @@ const Brain = (function () {
         return "सुनो… ";
     }
 
-    function detectName(text) {
+    function detectName(userText) {
 
-        text = text.trim();
+    const text = userText.trim();
 
-        if (text.startsWith("मेरा नाम")) {
-            let name = text.replace("मेरा नाम", "")
-                           .replace("है", "")
-                           .trim();
+    // Words that can NEVER be names
+    const bannedWords = [
+        "उदास","खुश","दुखी","गुस्सा","परेशान","थका",
+        "अकेला","ठीक","बीमार","टेंशन","चुप","ठीक हूँ"
+    ];
 
-            if (name.length > 1 && name.length < 20) {
-                safeNameSave(name);
-                return name;
-            }
+    let name = null;
+
+    // Rule 1: "मेरा नाम राहुल है"
+    if (text.startsWith("मेरा नाम")) {
+        name = text
+            .replace("मेरा नाम", "")
+            .replace("है", "")
+            .trim();
+    }
+
+    // Rule 2: "मैं राहुल हूँ"
+    else if (text.startsWith("मैं ") && text.endsWith("हूँ")) {
+        name = text
+            .replace("मैं", "")
+            .replace("हूँ", "")
+            .trim();
+    }
+
+    if (!name) return null;
+
+    // अगर banned word है → reject
+    if (bannedWords.includes(name)) {
+        return null;
+    }
+
+    // length validation
+    if (name.length < 2 || name.length > 20) {
+        return null;
+    }
+
+    MemoryEngine.setName(name);
+    return name;
+}
         }
 
         if (text.startsWith("मैं ") && text.includes("हूँ")) {
