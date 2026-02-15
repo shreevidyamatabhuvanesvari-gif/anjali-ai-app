@@ -1,21 +1,27 @@
 /* ===============================
-   TTS v2 — Text To Speech
+   TTS v2 — Mobile Safe Version
    Soft + Cute Female Style
    =============================== */
 
 function speak(text) {
 
-    if (!window.speechSynthesis) return;
+    if (!window.speechSynthesis) {
+        alert("TTS supported नहीं है");
+        return;
+    }
 
-    const speech = new SpeechSynthesisUtterance();
+    // Speech stop (अगर पहले से चल रही हो)
+    window.speechSynthesis.cancel();
 
-    speech.text = text;
+    const speech = new SpeechSynthesisUtterance(text);
+
     speech.lang = "hi-IN";
-
-    /* Soft + Cute feel */
     speech.rate = 0.9;
     speech.pitch = 1.2;
     speech.volume = 1;
 
-    window.speechSynthesis.speak(speech);
+    // Mobile fix: delay से बोलता है
+    setTimeout(() => {
+        window.speechSynthesis.speak(speech);
+    }, 200);
 }
