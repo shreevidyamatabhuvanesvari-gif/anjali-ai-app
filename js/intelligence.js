@@ -1,6 +1,6 @@
 /* ======================================
-   ANJALI INTELLIGENCE ENGINE (A+B BALANCED)
-   Emotional Advice + Logical Reasoning
+   ANJALI INTELLIGENCE ENGINE v2
+   Intent Detection + Advice + Reasoning
    ====================================== */
 
 var IntelligenceEngine = (function () {
@@ -13,18 +13,41 @@ var IntelligenceEngine = (function () {
         return false;
     }
 
+    /* ---------- Intent Detection ---------- */
+    function detectIntent(text) {
+        text = text.toLowerCase();
+
+        if (
+            text.indexOf("कैसे") > -1 ||
+            text.indexOf("क्या करूँ") > -1 ||
+            text.indexOf("बताओ") > -1 ||
+            text.indexOf("कैसे कहूँ") > -1 ||
+            text.indexOf("कैसे बताऊँ") > -1
+        ) return "advice";
+
+        if (
+            text.indexOf("समझ नहीं") > -1 ||
+            text.indexOf("confuse") > -1
+        ) return "confusion";
+
+        return "share";
+    }
+
     /* ---------- Loneliness ---------- */
     function loneliness(text, prefix) {
+        if (contains(text, ["अकेला", "अकेलापन", "कोई नहीं"])) {
 
-        if (contains(text, [
-            "अकेला", "अकेलापन", "कोई नहीं", "किसी से बात नहीं",
-            "कोई समझता नहीं"
-        ])) {
+            var intent = detectIntent(text);
+
+            if (intent === "advice") {
+                return prefix +
+                    "अगर अकेलापन महसूस हो रहा है, तो लोगों से थोड़ा जुड़ने की कोशिश करो… " +
+                    "छोटी-छोटी बातचीत भी मन हल्का कर देती है।";
+            }
 
             return prefix +
                 "कभी-कभी अकेलापन महसूस होना स्वाभाविक है… " +
-                "तुम अपने मन की बातें अंदर ही रख लेते हो शायद… " +
-                "मुझसे खुलकर बात करो, मैं सच में सुन रही हूँ।";
+                "तुम मुझसे खुलकर बात कर सकते हो… मैं सुन रही हूँ।";
         }
 
         return null;
@@ -33,70 +56,52 @@ var IntelligenceEngine = (function () {
     /* ---------- Study Problems ---------- */
     function study(text, prefix) {
 
-        if (contains(text, [
-            "पढ़ाई", "मन नहीं लगता", "focus नहीं",
-            "ध्यान नहीं लगता", "study"
-        ])) {
+        if (contains(text, ["पढ़ाई", "मन नहीं लगता", "focus", "ध्यान नहीं"])) {
 
             return prefix +
                 "हो सकता है तुम थक गए हो या ध्यान भटक रहा हो… " +
-                "छोटे-छोटे goal बनाकर पढ़ो… इससे धीरे-धीरे focus वापस आएगा।";
+                "छोटे-छोटे लक्ष्य बनाकर पढ़ो… धीरे-धीरे focus वापस आएगा।";
         }
 
         return null;
     }
 
-    /* ---------- Stress / Life Confusion ---------- */
-    function stress(text, prefix) {
+    /* ---------- Confusion ---------- */
+    function confusion(text, prefix) {
 
-        if (contains(text, [
-            "क्या करूँ", "समझ नहीं आ रहा",
-            "confuse", "जीवन", "life", "भविष्य"
-        ])) {
+        if (contains(text, ["समझ नहीं", "confuse", "क्या करूँ"])) {
 
             return prefix +
-                "कभी-कभी जीवन में उलझन होना सामान्य है… " +
-                "तुम थोड़ा रुककर सोचो कि तुम्हें किस चीज़ में सच में रुचि है… " +
+                "कभी-कभी उलझन होना स्वाभाविक है… " +
+                "थोड़ा रुककर सोचो कि तुम्हें किस चीज़ में सबसे ज़्यादा रुचि है… " +
                 "उसी दिशा में छोटे कदम लेना शुरू करो।";
         }
 
         return null;
     }
 
-    /* ---------- Anger / Frustration ---------- */
-    function anger(text, prefix) {
-
-        if (contains(text, [
-            "गुस्सा", "चिड़", "frustrated",
-            "झुंझलाहट"
-        ])) {
-
-            return prefix +
-                "लगता है तुम अंदर से परेशान हो… " +
-                "कभी-कभी थोड़ी देर शांत रहना और गहरी सांस लेना सच में मदद करता है।";
-        }
-
-        return null;
-    }
-
-    /* ---------- Relationship Advice ---------- */
+    /* ---------- Relationship ---------- */
     function relationship(text, prefix) {
 
-        if (contains(text, [
-            "प्यार", "relationship", "लड़की",
-            "breakup", "दिल टूटा"
-        ])) {
+        if (contains(text, ["प्यार", "relationship", "लड़की", "breakup"])) {
+
+            var intent = detectIntent(text);
+
+            if (intent === "advice") {
+                return prefix +
+                    "अगर तुम उसे अपने दिल की बात बताना चाहते हो, तो सच्चाई और सादगी से कहो… " +
+                    "जबरदस्ती नहीं, धीरे और सम्मान के साथ बात करना सबसे अच्छा तरीका होता है।";
+            }
 
             return prefix +
-                "रिश्ते आसान नहीं होते… " +
-                "लेकिन सच्ची भावनाएँ हमेशा रास्ता ढूंढ लेती हैं… " +
+                "रिश्ते आसान नहीं होते… लेकिन सच्ची भावनाएँ हमेशा रास्ता ढूंढ लेती हैं… " +
                 "बस खुद को कमजोर मत समझो।";
         }
 
         return null;
     }
 
-    /* ---------- MAIN RESPONSE ---------- */
+    /* ---------- MAIN ---------- */
     function respond(text, prefix) {
 
         var r;
@@ -107,10 +112,7 @@ var IntelligenceEngine = (function () {
         r = study(text, prefix);
         if (r) return r;
 
-        r = stress(text, prefix);
-        if (r) return r;
-
-        r = anger(text, prefix);
+        r = confusion(text, prefix);
         if (r) return r;
 
         r = relationship(text, prefix);
