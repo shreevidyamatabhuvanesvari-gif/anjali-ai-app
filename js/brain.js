@@ -1,7 +1,7 @@
 /* ======================================
-   ANJALI CENTRAL BRAIN — FINAL ULTRA + TOPIC DETECTION
+   ANJALI CENTRAL BRAIN — FINAL ULTRA + TOPIC DETECTION v2
    Decision Router + Deep Emotion + Mood Memory
-   Learning + Knowledge + Smart Topic Guess
+   Learning + Knowledge + Smart Topic Guess + Fallback Search
    ====================================== */
 
 var Brain = (function () {
@@ -118,19 +118,25 @@ var Brain = (function () {
             .trim();
     }
 
+    /* 🔥 UPDATED: Knowledge Handler with v2 Fallback */
     async function handleKnowledge(text) {
 
         var topicText = (text || "").toString();
 
+        /* 1️⃣ Learning Cache */
         if (typeof LearningEngine !== "undefined" && LearningEngine.get) {
             var cached = LearningEngine.get(topicText);
             if (cached) return cached;
         }
 
         if (typeof KnowledgeEngine !== "undefined" && KnowledgeEngine.search) {
+
             var topic = extractTopic(topicText);
+
+            /* 2️⃣ Try Full Topic */
             if (topic.length > 2) {
                 var info = await KnowledgeEngine.search(topic);
+
                 if (info) {
                     if (typeof LearningEngine !== "undefined") {
                         LearningEngine.set(topicText, info);
@@ -138,22 +144,31 @@ var Brain = (function () {
                     return info;
                 }
             }
+
+            /* 3️⃣ 🔥 Fallback: First Word Search */
+            var firstWord = topic.split(" ")[0];
+
+            if (firstWord && firstWord.length > 2) {
+                var info2 = await KnowledgeEngine.search(firstWord);
+
+                if (info2) {
+                    if (typeof LearningEngine !== "undefined") {
+                        LearningEngine.set(topicText, info2);
+                    }
+                    return info2;
+                }
+            }
         }
 
         return null;
     }
 
-    /* 🧠 NEW: Smart Topic Detection */
     function isTopicOnly(text) {
-
         var clean = (text || "").trim();
-
-        // 1–3 शब्द
         var wordCount = clean.split(" ").length;
 
         if (wordCount > 3) return false;
 
-        // question words नहीं होने चाहिए
         if (
             clean.indexOf("क्या") > -1 ||
             clean.indexOf("कौन") > -1 ||
@@ -183,7 +198,6 @@ var Brain = (function () {
         var text = (userText || "").toString();
         var prefix = getPrefix();
 
-        /* 1️⃣ Deep Emotion */
         if (typeof EmotionEngine !== "undefined") {
             var emoType = EmotionEngine.detect(text);
             if (emoType) {
@@ -195,27 +209,22 @@ var Brain = (function () {
             }
         }
 
-        /* 2️⃣ Basic Emotion */
         var basicEmo = detectEmotion(text);
         if (basicEmo) return prefix + basicEmo;
 
-        /* 3️⃣ Name */
         var name = detectName(text);
         if (name) {
             return prefix + "अच्छा… तो तुम्हारा नाम " + name + " है। अब मैं तुम्हें इसी नाम से बुलाऊँगी।";
         }
 
-        /* 4️⃣ Interest */
         var interest = detectInterest(text);
         if (interest) return prefix + interest;
 
-        /* 5️⃣ Knowledge (Question form) */
         if (classify(text) === "knowledge") {
             var knowledge = await handleKnowledge(text);
             if (knowledge) return prefix + knowledge;
         }
 
-        /* 6️⃣ NEW: Topic-only Knowledge */
         if (isTopicOnly(text)) {
             var topicInfo = await handleKnowledge(text);
             if (topicInfo) return prefix + topicInfo;
