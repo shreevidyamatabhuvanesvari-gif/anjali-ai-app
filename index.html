@@ -47,6 +47,18 @@
             cursor: pointer;
         }
 
+        /* नया v2 बटन */
+        .v2-btn {
+            position: absolute;
+            right: 80px;
+            top: 10px;
+            background: white;
+            border: none;
+            padding: 5px 10px;
+            border-radius: 8px;
+            cursor: pointer;
+        }
+
         .chat-box {
             flex: 1;
             padding: 10px;
@@ -86,6 +98,11 @@
     <div class="header">
         <h2>अंजली 💖</h2>
         <p>तुमसे बात करके अच्छा लगता है…</p>
+
+        <!-- नया Research Panel बटन -->
+        <button class="v2-btn" onclick="goToV2()">Anjali v2</button>
+
+        <!-- पुराना Admin बटन -->
         <button class="admin-btn" onclick="goToAdmin()">Admin</button>
     </div>
 
@@ -103,13 +120,17 @@
 function goToAdmin() {
     window.location.href = "admin.html";
 }
+
+function goToV2() {
+    window.location.href = "index_v2.html";
+}
 </script>
 
 <script src="js/memory.js"></script>
 <script src="js/knowledge.js"></script>
 <script src="js/learning.js"></script>
 <script src="js/emotion.js"></script>
- <script src="js/intelligence.js"></script>
+<script src="js/intelligence.js"></script>
 <script src="js/brain.js"></script>
 <script src="js/script.js"></script>
 
