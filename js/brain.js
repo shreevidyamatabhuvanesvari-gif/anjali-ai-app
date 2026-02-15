@@ -1,7 +1,7 @@
 /* ======================================
    ANJALI CORE BRAIN ENGINE
    Local Private Server (Decision Layer)
-   Works with memory.js
+   Works with memory.js + knowledge.js
    ====================================== */
 
 var Brain = (function () {
@@ -34,7 +34,7 @@ var Brain = (function () {
 
     /* ---------- Name Detection ---------- */
     function detectName(text) {
-        text = text.trim();
+        text = (text || "").trim();
 
         var banned = [
             "उदास","खुश","गुस्सा","परेशान",
@@ -105,6 +105,31 @@ var Brain = (function () {
         return null;
     }
 
+    /* ---------- Knowledge Detection (Wikipedia) ---------- */
+    async function detectKnowledge(text) {
+
+        if (text.indexOf("क्या है") > -1 || text.indexOf("कौन है") > -1 || text.indexOf("क्या होता है") > -1) {
+
+            if (typeof KnowledgeEngine !== "undefined" && KnowledgeEngine.search) {
+
+                var topic = text
+                    .replace("क्या है", "")
+                    .replace("कौन है", "")
+                    .replace("क्या होता है", "")
+                    .trim();
+
+                if (topic.length > 2) {
+                    var info = await KnowledgeEngine.search(topic);
+                    if (info) {
+                        return info;
+                    }
+                }
+            }
+        }
+
+        return null;
+    }
+
     /* ---------- Default Conversation ---------- */
     function normalReply(text) {
 
@@ -146,7 +171,13 @@ var Brain = (function () {
             return getPrefix() + interest;
         }
 
-        // 4️⃣ Normal reply
+        // 4️⃣ Knowledge (Global)
+        var knowledge = await detectKnowledge(text);
+        if (knowledge) {
+            return getPrefix() + knowledge;
+        }
+
+        // 5️⃣ Normal reply
         return getPrefix() + normalReply(text);
     }
 
