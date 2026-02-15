@@ -1,6 +1,6 @@
 /* ======================================
-   ANJALI CENTRAL BRAIN — FINAL ULTRA + INTELLIGENCE
-   Emotion + Advice + Knowledge + Topic Detection v2
+   ANJALI CENTRAL BRAIN — FINAL ULTRA + INTELLIGENCE (BALANCED)
+   Intelligence → Emotion → Knowledge → Normal
    ====================================== */
 
 var Brain = (function () {
@@ -133,9 +133,7 @@ var Brain = (function () {
             if (topic.length > 2) {
                 var info = await KnowledgeEngine.search(topic);
                 if (info) {
-                    if (typeof LearningEngine !== "undefined") {
-                        LearningEngine.set(topicText, info);
-                    }
+                    LearningEngine.set(topicText, info);
                     return info;
                 }
             }
@@ -145,9 +143,7 @@ var Brain = (function () {
             if (firstWord && firstWord.length > 2) {
                 var info2 = await KnowledgeEngine.search(firstWord);
                 if (info2) {
-                    if (typeof LearningEngine !== "undefined") {
-                        LearningEngine.set(topicText, info2);
-                    }
+                    LearningEngine.set(topicText, info2);
                     return info2;
                 }
             }
@@ -180,9 +176,6 @@ var Brain = (function () {
         if (text.indexOf("क्या कर रही हो") > -1)
             return "मैं तुमसे बात कर रही हूँ… और तुम्हें सुन रही हूँ।";
 
-        if (text.indexOf("प्यार") > -1)
-            return "तुमसे बात करना मुझे सच में अच्छा लगता है।";
-
         return "मैं सुन रही हूँ… और बताओ।";
     }
 
@@ -191,7 +184,13 @@ var Brain = (function () {
         var text = (userText || "").toString();
         var prefix = getPrefix();
 
-        /* 1️⃣ Deep Emotion */
+        /* 1️⃣ Intelligence FIRST */
+        if (typeof IntelligenceEngine !== "undefined") {
+            var intelReply = IntelligenceEngine.respond(text, prefix);
+            if (intelReply) return intelReply;
+        }
+
+        /* 2️⃣ Deep Emotion */
         if (typeof EmotionEngine !== "undefined") {
             var emoType = EmotionEngine.detect(text);
             if (emoType) {
@@ -201,12 +200,6 @@ var Brain = (function () {
                 if (emoType === "happy") saveMood("happy");
                 return deepReply;
             }
-        }
-
-        /* 2️⃣ Intelligence Layer (NEW) */
-        if (typeof IntelligenceEngine !== "undefined") {
-            var intelReply = IntelligenceEngine.respond(text, prefix);
-            if (intelReply) return intelReply;
         }
 
         /* 3️⃣ Basic Emotion */
@@ -223,7 +216,7 @@ var Brain = (function () {
         var interest = detectInterest(text);
         if (interest) return prefix + interest;
 
-        /* 6️⃣ Knowledge (Question form) */
+        /* 6️⃣ Knowledge */
         if (classify(text) === "knowledge") {
             var knowledge = await handleKnowledge(text);
             if (knowledge) return prefix + knowledge;
