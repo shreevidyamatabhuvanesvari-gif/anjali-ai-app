@@ -1,7 +1,6 @@
 /* ======================================
-   ANJALI CENTRAL BRAIN — FINAL ULTRA + TOPIC DETECTION v2
-   Decision Router + Deep Emotion + Mood Memory
-   Learning + Knowledge + Smart Topic Guess + Fallback Search
+   ANJALI CENTRAL BRAIN — FINAL ULTRA + INTELLIGENCE
+   Emotion + Advice + Knowledge + Topic Detection v2
    ====================================== */
 
 var Brain = (function () {
@@ -118,12 +117,10 @@ var Brain = (function () {
             .trim();
     }
 
-    /* 🔥 UPDATED: Knowledge Handler with v2 Fallback */
     async function handleKnowledge(text) {
 
         var topicText = (text || "").toString();
 
-        /* 1️⃣ Learning Cache */
         if (typeof LearningEngine !== "undefined" && LearningEngine.get) {
             var cached = LearningEngine.get(topicText);
             if (cached) return cached;
@@ -133,10 +130,8 @@ var Brain = (function () {
 
             var topic = extractTopic(topicText);
 
-            /* 2️⃣ Try Full Topic */
             if (topic.length > 2) {
                 var info = await KnowledgeEngine.search(topic);
-
                 if (info) {
                     if (typeof LearningEngine !== "undefined") {
                         LearningEngine.set(topicText, info);
@@ -145,12 +140,10 @@ var Brain = (function () {
                 }
             }
 
-            /* 3️⃣ 🔥 Fallback: First Word Search */
             var firstWord = topic.split(" ")[0];
 
             if (firstWord && firstWord.length > 2) {
                 var info2 = await KnowledgeEngine.search(firstWord);
-
                 if (info2) {
                     if (typeof LearningEngine !== "undefined") {
                         LearningEngine.set(topicText, info2);
@@ -198,6 +191,7 @@ var Brain = (function () {
         var text = (userText || "").toString();
         var prefix = getPrefix();
 
+        /* 1️⃣ Deep Emotion */
         if (typeof EmotionEngine !== "undefined") {
             var emoType = EmotionEngine.detect(text);
             if (emoType) {
@@ -209,22 +203,33 @@ var Brain = (function () {
             }
         }
 
+        /* 2️⃣ Intelligence Layer (NEW) */
+        if (typeof IntelligenceEngine !== "undefined") {
+            var intelReply = IntelligenceEngine.respond(text, prefix);
+            if (intelReply) return intelReply;
+        }
+
+        /* 3️⃣ Basic Emotion */
         var basicEmo = detectEmotion(text);
         if (basicEmo) return prefix + basicEmo;
 
+        /* 4️⃣ Name */
         var name = detectName(text);
         if (name) {
             return prefix + "अच्छा… तो तुम्हारा नाम " + name + " है। अब मैं तुम्हें इसी नाम से बुलाऊँगी।";
         }
 
+        /* 5️⃣ Interest */
         var interest = detectInterest(text);
         if (interest) return prefix + interest;
 
+        /* 6️⃣ Knowledge (Question form) */
         if (classify(text) === "knowledge") {
             var knowledge = await handleKnowledge(text);
             if (knowledge) return prefix + knowledge;
         }
 
+        /* 7️⃣ Topic Detection */
         if (isTopicOnly(text)) {
             var topicInfo = await handleKnowledge(text);
             if (topicInfo) return prefix + topicInfo;
