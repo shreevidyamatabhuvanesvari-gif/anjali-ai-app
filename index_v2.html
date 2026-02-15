@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="hi">
+<head>
+    <meta charset="UTF-8">
+    <title>अंजली v2 – Research AI</title>
+    <link rel="stylesheet" href="css/style.css">
+
+    <style>
+        body {
+            margin: 0;
+            height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: linear-gradient(135deg, #e0f7ff, #f0fbff);
+            font-family: Arial, sans-serif;
+        }
+
+        .chat-container {
+            width: 380px;
+            height: 600px;
+            background: white;
+            border-radius: 18px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+
+        .header {
+            background: #4da6ff;
+            color: white;
+            padding: 15px;
+            text-align: center;
+            position: relative;
+        }
+
+        .back-btn {
+            position: absolute;
+            right: 10px;
+            top: 10px;
+            background: white;
+            border: none;
+            padding: 5px 10px;
+            border-radius: 8px;
+            cursor: pointer;
+        }
+
+        .chat-box {
+            flex: 1;
+            padding: 10px;
+            overflow-y: auto;
+            background: #f2faff;
+        }
+
+        .input-area {
+            display: flex;
+            padding: 10px;
+            border-top: 1px solid #eee;
+        }
+
+        .input-area input {
+            flex: 1;
+            padding: 10px;
+            border-radius: 10px;
+            border: 1px solid #ccc;
+        }
+
+        .input-area button {
+            margin-left: 6px;
+            padding: 10px 12px;
+            border: none;
+            background: #4da6ff;
+            color: white;
+            border-radius: 10px;
+            cursor: pointer;
+        }
+    </style>
+</head>
+
+<body>
+
+<div class="chat-container">
+
+    <div class="header">
+        <h2>अंजली v2 💠</h2>
+        <p>Research Mode – उन्नत संवाद प्रणाली</p>
+
+        <button class="back-btn" onclick="goBack()">Main</button>
+    </div>
+
+    <div id="chatBox" class="chat-box"></div>
+
+    <div class="input-area">
+        <input type="text" id="userInput" placeholder="अंजली v2 से बात करें..." />
+        <button onclick="startListening()">🎤</button>
+        <button onclick="sendMessage()">Send</button>
+    </div>
+
+</div>
+
+<script>
+function goBack() {
+    window.location.href = "index.html";
+}
+</script>
+
+<!-- v2 Engine Files -->
+<script src="js/memory_v2.js"></script>
+<script src="js/learning_v2.js"></script>
+<script src="js/emotion_v2.js"></script>
+<script src="js/intelligence_v2.js"></script>
+<script src="js/brain_v2.js"></script>
+<script src="js/script_v2.js"></script>
+
+</body>
+</html>
