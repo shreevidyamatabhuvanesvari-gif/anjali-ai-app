@@ -1,12 +1,11 @@
 /* ======================================
-   ANJALI CENTRAL BRAIN — FINAL ULTRA
+   ANJALI CENTRAL BRAIN — FINAL ULTRA + TOPIC DETECTION
    Decision Router + Deep Emotion + Mood Memory
-   Learning + Knowledge + Personalization
+   Learning + Knowledge + Smart Topic Guess
    ====================================== */
 
 var Brain = (function () {
 
-    /* ---------- Safe Helpers ---------- */
     function getPrefix() {
         if (typeof MemoryEngine !== "undefined" && MemoryEngine.getCallPrefix) {
             return MemoryEngine.getCallPrefix();
@@ -32,9 +31,6 @@ var Brain = (function () {
         }
     }
 
-    /* ======================================
-       CLASSIFIER (Routing Support)
-       ====================================== */
     function classify(text) {
         text = (text || "").toLowerCase();
 
@@ -54,7 +50,6 @@ var Brain = (function () {
         return "normal";
     }
 
-    /* ---------- Name Detection ---------- */
     function detectName(text) {
         text = (text || "").trim();
 
@@ -82,7 +77,6 @@ var Brain = (function () {
         return null;
     }
 
-    /* ---------- Basic Emotion (Direct + Mood Save) ---------- */
     function detectEmotion(text) {
         text = (text || "").toLowerCase();
 
@@ -104,7 +98,6 @@ var Brain = (function () {
         return null;
     }
 
-    /* ---------- Interest Learning ---------- */
     function detectInterest(text) {
         if ((text || "").indexOf("मुझे पसंद है") > -1) {
             var topic = text.replace("मुझे पसंद है", "").trim();
@@ -116,7 +109,6 @@ var Brain = (function () {
         return null;
     }
 
-    /* ---------- Knowledge Tools ---------- */
     function extractTopic(text) {
         return (text || "")
             .toLowerCase()
@@ -127,21 +119,20 @@ var Brain = (function () {
     }
 
     async function handleKnowledge(text) {
+
         var topicText = (text || "").toString();
 
-        /* 1) Learning Cache */
         if (typeof LearningEngine !== "undefined" && LearningEngine.get) {
             var cached = LearningEngine.get(topicText);
             if (cached) return cached;
         }
 
-        /* 2) Wikipedia */
         if (typeof KnowledgeEngine !== "undefined" && KnowledgeEngine.search) {
             var topic = extractTopic(topicText);
             if (topic.length > 2) {
                 var info = await KnowledgeEngine.search(topic);
                 if (info) {
-                    if (typeof LearningEngine !== "undefined" && LearningEngine.set) {
+                    if (typeof LearningEngine !== "undefined") {
                         LearningEngine.set(topicText, info);
                     }
                     return info;
@@ -152,7 +143,26 @@ var Brain = (function () {
         return null;
     }
 
-    /* ---------- Normal Talk ---------- */
+    /* 🧠 NEW: Smart Topic Detection */
+    function isTopicOnly(text) {
+
+        var clean = (text || "").trim();
+
+        // 1–3 शब्द
+        var wordCount = clean.split(" ").length;
+
+        if (wordCount > 3) return false;
+
+        // question words नहीं होने चाहिए
+        if (
+            clean.indexOf("क्या") > -1 ||
+            clean.indexOf("कौन") > -1 ||
+            clean.indexOf("कैसे") > -1
+        ) return false;
+
+        return true;
+    }
+
     function normalReply(text) {
         text = (text || "").toLowerCase();
 
@@ -168,38 +178,24 @@ var Brain = (function () {
         return "मैं सुन रही हूँ… और बताओ।";
     }
 
-    /* ======================================
-       CENTRAL ROUTER — FINAL ULTRA PRIORITY
-       Order:
-       1) Deep EmotionEngine (indirect)
-       2) Basic detectEmotion (direct + save mood)
-       3) Name
-       4) Interest
-       5) Knowledge (Learning + Wiki)
-       6) Normal
-       ====================================== */
-
     async function respond(userText) {
 
         var text = (userText || "").toString();
         var prefix = getPrefix();
 
-        /* 1️⃣ Deep EmotionEngine (Indirect feelings) */
-        if (typeof EmotionEngine !== "undefined" && EmotionEngine.detect) {
+        /* 1️⃣ Deep Emotion */
+        if (typeof EmotionEngine !== "undefined") {
             var emoType = EmotionEngine.detect(text);
             if (emoType) {
                 var deepReply = EmotionEngine.reply(emoType, prefix);
-
-                // Map deep types to mood log (soft mapping)
                 if (emoType === "sad") saveMood("sad");
                 if (emoType === "stress") saveMood("angry");
                 if (emoType === "happy") saveMood("happy");
-
-                if (deepReply) return deepReply;
+                return deepReply;
             }
         }
 
-        /* 2️⃣ Basic Direct Emotion (keeps mood memory strong) */
+        /* 2️⃣ Basic Emotion */
         var basicEmo = detectEmotion(text);
         if (basicEmo) return prefix + basicEmo;
 
@@ -213,13 +209,18 @@ var Brain = (function () {
         var interest = detectInterest(text);
         if (interest) return prefix + interest;
 
-        /* 5️⃣ Knowledge */
+        /* 5️⃣ Knowledge (Question form) */
         if (classify(text) === "knowledge") {
             var knowledge = await handleKnowledge(text);
             if (knowledge) return prefix + knowledge;
         }
 
-        /* 6️⃣ Normal */
+        /* 6️⃣ NEW: Topic-only Knowledge */
+        if (isTopicOnly(text)) {
+            var topicInfo = await handleKnowledge(text);
+            if (topicInfo) return prefix + topicInfo;
+        }
+
         return prefix + normalReply(text);
     }
 
