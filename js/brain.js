@@ -1,7 +1,7 @@
 /* ======================================
-   ANJALI CORE BRAIN ENGINE
-   Local Private Server (Decision Layer)
-   Works with memory.js + knowledge.js
+   ANJALI CORE BRAIN ENGINE (FINAL SAFE)
+   Local Private Server + Learning Cache
+   Works with: memory.js + knowledge.js + learning.js
    ====================================== */
 
 var Brain = (function () {
@@ -41,26 +41,16 @@ var Brain = (function () {
             "दुखी","थका","अकेला","ठीक"
         ];
 
-        // मेरा नाम राहुल है
         if (text.indexOf("मेरा नाम") === 0) {
-            var name = text
-                .replace("मेरा नाम", "")
-                .replace("है", "")
-                .trim();
-
+            var name = text.replace("मेरा नाम", "").replace("है", "").trim();
             if (name.length > 1 && banned.indexOf(name) === -1) {
                 saveName(name);
                 return name;
             }
         }
 
-        // मैं राहुल हूँ
         if (text.indexOf("मैं ") === 0 && text.indexOf("हूँ") > -1) {
-            var name2 = text
-                .replace("मैं", "")
-                .replace("हूँ", "")
-                .trim();
-
+            var name2 = text.replace("मैं", "").replace("हूँ", "").trim();
             if (name2.length > 1 && banned.indexOf(name2) === -1) {
                 saveName(name2);
                 return name2;
@@ -105,24 +95,53 @@ var Brain = (function () {
         return null;
     }
 
-    /* ---------- Knowledge Detection (Wikipedia) ---------- */
-    async function detectKnowledge(text) {
+    /* ---------- Knowledge Intent ---------- */
+    function isKnowledgeQuery(text) {
+        return (
+            text.indexOf("क्या है") > -1 ||
+            text.indexOf("कौन है") > -1 ||
+            text.indexOf("क्या होता है") > -1
+        );
+    }
 
-        if (text.indexOf("क्या है") > -1 || text.indexOf("कौन है") > -1 || text.indexOf("क्या होता है") > -1) {
+    /* ---------- Extract Topic ---------- */
+    function extractTopic(text) {
+        return (text || "")
+            .toLowerCase()
+            .replace("क्या है", "")
+            .replace("कौन है", "")
+            .replace("क्या होता है", "")
+            .trim();
+    }
 
-            if (typeof KnowledgeEngine !== "undefined" && KnowledgeEngine.search) {
+    /* ---------- Knowledge Handler ---------- */
+    async function handleKnowledge(text) {
 
-                var topic = text
-                    .replace("क्या है", "")
-                    .replace("कौन है", "")
-                    .replace("क्या होता है", "")
-                    .trim();
+        if (!isKnowledgeQuery(text)) return null;
 
-                if (topic.length > 2) {
-                    var info = await KnowledgeEngine.search(topic);
-                    if (info) {
-                        return info;
+        var topicText = (text || "").toString();
+
+        /* 1️⃣ Local Learning Check */
+        if (typeof LearningEngine !== "undefined" && LearningEngine.get) {
+            var cached = LearningEngine.get(topicText);
+            if (cached) return cached;
+        }
+
+        /* 2️⃣ Wikipedia Search */
+        if (typeof KnowledgeEngine !== "undefined" && KnowledgeEngine.search) {
+            var topic = extractTopic(topicText);
+
+            if (topic.length > 2) {
+                var info = await KnowledgeEngine.search(topic);
+
+                if (info) {
+
+                    /* 3️⃣ Save Learning */
+                    if (typeof LearningEngine !== "undefined" && LearningEngine.set) {
+                        LearningEngine.set(topicText, info);
                     }
+
+                    return info;
                 }
             }
         }
@@ -130,7 +149,7 @@ var Brain = (function () {
         return null;
     }
 
-    /* ---------- Default Conversation ---------- */
+    /* ---------- Normal Conversation ---------- */
     function normalReply(text) {
 
         if (text.indexOf("कैसी हो") > -1) {
@@ -148,36 +167,31 @@ var Brain = (function () {
         return "मैं सुन रही हूँ… और बताओ।";
     }
 
-    /* ---------- MAIN RESPONSE ENGINE ---------- */
+    /* ---------- MAIN ENGINE ---------- */
     async function respond(userText) {
 
-        var text = userText || "";
+        var text = (userText || "").toString();
 
-        // 1️⃣ Name detection
         var name = detectName(text);
         if (name) {
             return getPrefix() + "अच्छा… तो तुम्हारा नाम " + name + " है। अब मैं तुम्हें इसी नाम से बुलाऊँगी।";
         }
 
-        // 2️⃣ Emotion detection
         var emo = detectEmotion(text);
         if (emo) {
             return getPrefix() + emo;
         }
 
-        // 3️⃣ Interest learning
         var interest = detectInterest(text);
         if (interest) {
             return getPrefix() + interest;
         }
 
-        // 4️⃣ Knowledge (Global)
-        var knowledge = await detectKnowledge(text);
+        var knowledge = await handleKnowledge(text);
         if (knowledge) {
             return getPrefix() + knowledge;
         }
 
-        // 5️⃣ Normal reply
         return getPrefix() + normalReply(text);
     }
 
