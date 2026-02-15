@@ -1,81 +1,77 @@
-/* ===============================
-   js/brain.js  (Production-Safe)
-   =============================== */
+/* ======================================
+   ANJALI CORE BRAIN ENGINE
+   Local Private Server (Decision Layer)
+   Works with memory.js
+   ====================================== */
 
 var Brain = (function () {
 
-    /* ---------- Safe helpers ---------- */
-    function hasMemory() {
-        return (typeof MemoryEngine !== "undefined");
-    }
-
+    /* ---------- Safe Helpers ---------- */
     function getPrefix() {
-        try {
-            if (hasMemory() && typeof MemoryEngine.getCallPrefix === "function") {
-                return MemoryEngine.getCallPrefix();
-            }
-        } catch (e) {}
+        if (typeof MemoryEngine !== "undefined" && MemoryEngine.getCallPrefix) {
+            return MemoryEngine.getCallPrefix();
+        }
         return "सुनो… ";
     }
 
     function saveName(name) {
-        try {
-            if (hasMemory() && typeof MemoryEngine.setName === "function") {
-                MemoryEngine.setName(name);
-            }
-        } catch (e) {}
+        if (typeof MemoryEngine !== "undefined" && MemoryEngine.setName) {
+            MemoryEngine.setName(name);
+        }
     }
 
     function saveMood(mood) {
-        try {
-            if (hasMemory() && typeof MemoryEngine.logMood === "function") {
-                MemoryEngine.logMood(mood);
-            }
-        } catch (e) {}
+        if (typeof MemoryEngine !== "undefined" && MemoryEngine.logMood) {
+            MemoryEngine.logMood(mood);
+        }
     }
 
-    /* ---------- Name Detection (Intent-based) ---------- */
+    function addInterest(topic) {
+        if (typeof MemoryEngine !== "undefined" && MemoryEngine.addInterest) {
+            MemoryEngine.addInterest(topic);
+        }
+    }
+
+    /* ---------- Name Detection ---------- */
     function detectName(text) {
-        if (!text) return null;
+        text = text.trim();
 
-        var t = text.trim();
-
-        // Words that should NEVER be treated as names
         var banned = [
-            "उदास","खुश","दुखी","गुस्सा","परेशान",
-            "थका","अकेला","ठीक","बीमार","चुप","टेंशन"
+            "उदास","खुश","गुस्सा","परेशान",
+            "दुखी","थका","अकेला","ठीक"
         ];
 
-        var name = null;
-
-        // Case 1: "मेरा नाम राहुल है"
-        if (t.indexOf("मेरा नाम") === 0) {
-            name = t
+        // मेरा नाम राहुल है
+        if (text.indexOf("मेरा नाम") === 0) {
+            var name = text
                 .replace("मेरा नाम", "")
                 .replace("है", "")
                 .trim();
+
+            if (name.length > 1 && banned.indexOf(name) === -1) {
+                saveName(name);
+                return name;
+            }
         }
-        // Case 2: "मैं राहुल हूँ"
-        else if (t.indexOf("मैं ") === 0 && t.indexOf("हूँ") > -1) {
-            name = t
+
+        // मैं राहुल हूँ
+        if (text.indexOf("मैं ") === 0 && text.indexOf("हूँ") > -1) {
+            var name2 = text
                 .replace("मैं", "")
                 .replace("हूँ", "")
                 .trim();
+
+            if (name2.length > 1 && banned.indexOf(name2) === -1) {
+                saveName(name2);
+                return name2;
+            }
         }
 
-        if (!name) return null;
-
-        // Basic validation
-        if (name.length < 2 || name.length > 20) return null;
-        if (banned.indexOf(name) > -1) return null;
-
-        saveName(name);
-        return name;
+        return null;
     }
 
     /* ---------- Emotion Detection ---------- */
     function detectEmotion(text) {
-        if (!text) return null;
 
         if (text.indexOf("उदास") > -1 || text.indexOf("दुख") > -1) {
             saveMood("sad");
@@ -87,7 +83,7 @@ var Brain = (function () {
             return "तुम खुश लग रहे हो… मुझे अच्छा लग रहा है।";
         }
 
-        if (text.indexOf("गुस्सा") > -1) {
+        if (text.indexOf("गुस्सा") > -1 || text.indexOf("परेशान") > -1) {
             saveMood("angry");
             return "तुम परेशान लग रहे हो… आराम से बताओ।";
         }
@@ -95,24 +91,63 @@ var Brain = (function () {
         return null;
     }
 
-    /* ---------- Main Engine ---------- */
-    async function respond(userText) {
-        var text = (userText || "").toString();
+    /* ---------- Interest Learning ---------- */
+    function detectInterest(text) {
 
-        // 1) Name intent
+        if (text.indexOf("मुझे पसंद है") > -1) {
+            var topic = text.replace("मुझे पसंद है", "").trim();
+            if (topic.length > 2) {
+                addInterest(topic);
+                return "अच्छा… तुम्हें " + topic + " पसंद है, मुझे याद रहेगा।";
+            }
+        }
+
+        return null;
+    }
+
+    /* ---------- Default Conversation ---------- */
+    function normalReply(text) {
+
+        if (text.indexOf("कैसी हो") > -1) {
+            return "मैं ठीक हूँ… तुमसे बात करके अच्छा लग रहा है।";
+        }
+
+        if (text.indexOf("क्या कर रही हो") > -1) {
+            return "मैं तुमसे बात कर रही हूँ… और तुम्हें सुन रही हूँ।";
+        }
+
+        if (text.indexOf("प्यार") > -1) {
+            return "तुमसे बात करना मुझे सच में अच्छा लगता है।";
+        }
+
+        return "मैं सुन रही हूँ… और बताओ।";
+    }
+
+    /* ---------- MAIN RESPONSE ENGINE ---------- */
+    async function respond(userText) {
+
+        var text = userText || "";
+
+        // 1️⃣ Name detection
         var name = detectName(text);
         if (name) {
             return getPrefix() + "अच्छा… तो तुम्हारा नाम " + name + " है। अब मैं तुम्हें इसी नाम से बुलाऊँगी।";
         }
 
-        // 2) Emotion intent
+        // 2️⃣ Emotion detection
         var emo = detectEmotion(text);
         if (emo) {
             return getPrefix() + emo;
         }
 
-        // 3) Default conversational line
-        return getPrefix() + "मैं सुन रही हूँ… और बताओ।";
+        // 3️⃣ Interest learning
+        var interest = detectInterest(text);
+        if (interest) {
+            return getPrefix() + interest;
+        }
+
+        // 4️⃣ Normal reply
+        return getPrefix() + normalReply(text);
     }
 
     return {
