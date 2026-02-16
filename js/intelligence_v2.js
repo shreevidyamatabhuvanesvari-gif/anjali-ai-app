@@ -2,12 +2,11 @@
    ANJALI INTELLIGENCE ENGINE v2
    LEVEL 5.5 – Ultra Intelligence Mode
    Teacher + Coach + Caring + Deep Thinker
-   Deep + Adaptive Reasoning
+   Deep + Adaptive Reasoning (Improved Intent)
    ====================================== */
 
 var IntelligenceEngineV2 = (function () {
 
-    /* ---------- Helper ---------- */
     function contains(text, words) {
         for (let w of words) {
             if (text.includes(w)) return true;
@@ -17,13 +16,44 @@ var IntelligenceEngineV2 = (function () {
 
     /* ---------- INTENT DETECTION ---------- */
     function detectIntent(text) {
-        text = (text || "").toLowerCase();
+        text = (text || "").toLowerCase().trim();
 
-        if (contains(text, ["पढ़ाई", "study", "मन नहीं लगता", "focus"])) return "study";
-        if (contains(text, ["समझ नहीं", "क्या करूँ", "confuse"])) return "confusion";
-        if (contains(text, ["थक गया", "motivation", "मन नहीं करता"])) return "motivation";
-        if (contains(text, ["प्यार", "love", "propose"])) return "relationship";
-        if (contains(text, ["कौन सा", "कौनसा", "चुनूँ", "decision"])) return "decision";
+        // STUDY
+        if (contains(text, [
+            "पढ़ाई", "study", "focus", "याद नहीं रहता",
+            "पढ़ने का मन नहीं", "पढ़ाई में मन"
+        ])) return "study";
+
+        // CONFUSION
+        if (contains(text, [
+            "समझ नहीं", "क्या करूँ", "confuse",
+            "समझ नहीं आ रहा", "उलझन"
+        ])) return "confusion";
+
+        // MOTIVATION (UPDATED - stronger)
+        if (contains(text, [
+            "मन नहीं करता",
+            "कुछ करने का मन नहीं करता",
+            "कुछ करने का मन नहीं",
+            "कुछ करने का दिल नहीं",
+            "कुछ करने की इच्छा नहीं",
+            "थक गया हूँ",
+            "थकान",
+            "कुछ करने का मन ही नहीं",
+            "जी नहीं करता"
+        ])) return "motivation";
+
+        // RELATIONSHIP
+        if (contains(text, [
+            "प्यार", "love", "propose",
+            "किसी से प्यार", "दिल लग गया"
+        ])) return "relationship";
+
+        // DECISION
+        if (contains(text, [
+            "कौन सा", "कौनसा", "चुनूँ",
+            "decision", "कौन सा रास्ता"
+        ])) return "decision";
 
         return null;
     }
@@ -40,21 +70,21 @@ var IntelligenceEngineV2 = (function () {
     function confusionAdvice(prefix) {
         return prefix +
         "जब मन बहुत उलझा होता है, तो दिमाग एक साथ बहुत सारी बातें सोचने लगता है। " +
-        "ऐसे समय पर सबसे अच्छा तरीका है — एक कागज़ पर अपनी समस्या लिखो और उसके नीचे दो–तीन संभावित रास्ते लिखो। " +
+        "ऐसे समय पर अपनी समस्या लिखो और उसके नीचे दो–तीन संभावित रास्ते लिखो। " +
         "धीरे-धीरे स्पष्टता आने लगती है।";
     }
 
     function motivationAdvice(prefix) {
         return prefix +
-        "कभी-कभी मन थक जाता है, इसलिए कुछ करने का मन नहीं करता। " +
+        "कभी-कभी मन और शरीर दोनों थक जाते हैं, इसलिए कुछ करने की इच्छा नहीं होती। " +
         "इसका मतलब यह नहीं कि तुम कमजोर हो… बस तुम्हें थोड़ा आराम और नई शुरुआत की ज़रूरत है। " +
-        "छोटे काम से शुरू करो, मन खुद वापस बनने लगेगा।";
+        "छोटे काम से शुरू करो, मन धीरे-धीरे वापस सक्रिय होने लगेगा।";
     }
 
     function relationshipAdvice(prefix) {
         return prefix +
         "प्यार एक बहुत गहरा और सच्चा एहसास होता है। " +
-        "सबसे पहले अपने दिल को समझो, फिर सामने वाले को धीरे-धीरे अपनी बात महसूस होने दो। " +
+        "सबसे पहले अपने दिल को समझो, फिर सामने वाले को धीरे-धीरे अपनी भावनाएँ महसूस होने दो। " +
         "जल्दबाज़ी नहीं… सच्चाई और सम्मान हमेशा सबसे मजबूत रास्ता होता है।";
     }
 
@@ -69,37 +99,19 @@ var IntelligenceEngineV2 = (function () {
     function respond(text, prefix) {
 
         text = (text || "").toLowerCase();
-
         var intent = detectIntent(text);
 
         if (!intent) return null;
 
-        /* Deep + Adaptive selection */
-
-        if (intent === "study") {
-            return studyAdvice(prefix);
-        }
-
-        if (intent === "confusion") {
-            return confusionAdvice(prefix);
-        }
-
-        if (intent === "motivation") {
-            return motivationAdvice(prefix);
-        }
-
-        if (intent === "relationship") {
-            return relationshipAdvice(prefix);
-        }
-
-        if (intent === "decision") {
-            return decisionAdvice(prefix);
-        }
+        if (intent === "study") return studyAdvice(prefix);
+        if (intent === "confusion") return confusionAdvice(prefix);
+        if (intent === "motivation") return motivationAdvice(prefix);
+        if (intent === "relationship") return relationshipAdvice(prefix);
+        if (intent === "decision") return decisionAdvice(prefix);
 
         return null;
     }
 
-    /* ---------- PUBLIC API ---------- */
     return {
         respond: respond
     };
