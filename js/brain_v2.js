@@ -1,3 +1,8 @@
+/* ======================================
+   ANJALI BRAIN v2
+   Emotion + Intelligence + Knowledge + Name + Language
+   ====================================== */
+
 var BrainV2 = (function () {
 
     function makeContext(type, emotion) {
@@ -36,8 +41,7 @@ var BrainV2 = (function () {
 
             if (emoType) {
                 context = makeContext("emotion", emoType);
-                baseReply = "emotion"; 
-                // signal for language engine
+                baseReply = "emotion";
             }
         }
 
@@ -50,7 +54,16 @@ var BrainV2 = (function () {
             }
         }
 
-        /* 3️⃣ Name */
+        /* 3️⃣ Knowledge (Wikipedia Search) */
+        if (!baseReply && typeof KnowledgeEngineV2 !== "undefined") {
+            var knowledge = await KnowledgeEngineV2.resolve(text);
+            if (knowledge) {
+                context = makeContext("knowledge", null);
+                baseReply = knowledge;
+            }
+        }
+
+        /* 4️⃣ Name Detection */
         if (!baseReply) {
             var name = detectName(text);
             if (name) {
@@ -59,13 +72,13 @@ var BrainV2 = (function () {
             }
         }
 
-        /* 4️⃣ Normal */
+        /* 5️⃣ Normal */
         if (!baseReply) {
             context = makeContext("normal", null);
             baseReply = "normal";
         }
 
-        /* 5️⃣ Language Transform */
+        /* 6️⃣ Language Polish */
         if (typeof LanguageEngineV2 !== "undefined") {
             return LanguageEngineV2.transform(baseReply, context);
         }
