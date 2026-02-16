@@ -1,6 +1,6 @@
 /* ======================================
-   ANJALI KNOWLEDGE ENGINE v2 — FINAL WORKING
-   Wikipedia + Learning Cache
+   ANJALI KNOWLEDGE ENGINE v2 — FINAL FIXED
+   Wikipedia Concept + Fact Hybrid
    ====================================== */
 
 var KnowledgeEngineV2 = (function () {
@@ -11,23 +11,24 @@ var KnowledgeEngineV2 = (function () {
     function cleanTopic(text) {
         return (text || "")
             .toLowerCase()
-            .replace(/\?/g, "")
-            .replace(/क्या है/g, "")
-            .replace(/कौन है/g, "")
-            .replace(/क्या होता है/g, "")
-            .replace(/बताओ/g, "")
-            .replace(/समझाओ/g, "")
+            .replace("क्या है", "")
+            .replace("कौन है", "")
+            .replace("कहाँ है", "")
+            .replace("कहां है", "")
+            .replace("क्या होता है", "")
+            .replace("बताओ", "")
+            .replace("समझाओ", "")
             .trim();
     }
 
     /* ---------- Guess Topic ---------- */
     function guessTopic(text) {
 
-        var topic = cleanTopic(text);
+        let t = cleanTopic(text);
 
-        if (topic.length > 1) return topic;
+        if (t.length > 2) return t;
 
-        return text.trim();
+        return (text || "").trim();
     }
 
     /* ---------- Wikipedia Search ---------- */
@@ -35,8 +36,7 @@ var KnowledgeEngineV2 = (function () {
 
         try {
 
-            var topic = guessTopic(topicText);
-
+            let topic = guessTopic(topicText);
             if (!topic || topic.length < 2) return null;
 
             const res = await fetch(API + encodeURIComponent(topic));
@@ -45,7 +45,9 @@ var KnowledgeEngineV2 = (function () {
 
             const data = await res.json();
 
-            if (data.extract) return data.extract;
+            if (data && data.extract) {
+                return data.extract;
+            }
 
             return null;
 
@@ -55,23 +57,23 @@ var KnowledgeEngineV2 = (function () {
         }
     }
 
-    /* ---------- Main Resolver ---------- */
+    /* ---------- Knowledge Resolver ---------- */
     async function resolve(text) {
 
-        var topic = guessTopic(text);
+        let topic = guessTopic(text);
 
-        /* 1️⃣ Learning Cache (FIXED NAME) */
+        /* 1️⃣ Learning Cache Check */
         if (typeof LearningEngineV2 !== "undefined" && LearningEngineV2.get) {
-            var cached = LearningEngineV2.get(topic);
+            let cached = LearningEngineV2.get(topic);
             if (cached) return cached;
         }
 
-        /* 2️⃣ Wikipedia */
-        var info = await search(topic);
+        /* 2️⃣ Wikipedia Search */
+        let info = await search(topic);
 
         if (info) {
 
-            /* 3️⃣ Save Learning (FIXED NAME) */
+            /* 3️⃣ Save Learning */
             if (typeof LearningEngineV2 !== "undefined" && LearningEngineV2.set) {
                 LearningEngineV2.set(topic, info);
             }
@@ -83,6 +85,7 @@ var KnowledgeEngineV2 = (function () {
     }
 
     return {
+        search: search,
         resolve: resolve
     };
 
