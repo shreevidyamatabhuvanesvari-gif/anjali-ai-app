@@ -1,8 +1,8 @@
 /* ======================================
-   ANJALI KNOWLEDGE ENGINE v2
+   ANJALI KNOWLEDGE ENGINE v2 — FINAL STABLE
    LEVEL 3 – Concept + Fact Hybrid
    Technology + Psychology + Emotions
-   Wikipedia Powered
+   Wikipedia Powered (Robust Topic Extraction)
    ====================================== */
 
 var KnowledgeEngineV2 = (function () {
@@ -11,8 +11,12 @@ var KnowledgeEngineV2 = (function () {
 
     /* ---------- Clean Topic ---------- */
     function cleanTopic(text) {
+
         return (text || "")
             .toLowerCase()
+            .replace(/\?/g, "")
+            .replace(/\./g, "")
+            .replace(/!/g, "")
             .replace("क्या है", "")
             .replace("कौन है", "")
             .replace("क्या होता है", "")
@@ -26,9 +30,9 @@ var KnowledgeEngineV2 = (function () {
 
         let t = cleanTopic(text);
 
-        if (t.length > 2) return t;
+        if (t && t.length > 1) return t;
 
-        return text;
+        return (text || "").trim();
     }
 
     /* ---------- Domain Detection ---------- */
@@ -73,14 +77,16 @@ var KnowledgeEngineV2 = (function () {
         try {
 
             let topic = guessTopic(topicText);
+
             if (!topic || topic.length < 2) return null;
 
             const res = await fetch(API + encodeURIComponent(topic));
+
             if (!res.ok) return null;
 
             const data = await res.json();
 
-            if (data.extract) {
+            if (data && data.extract) {
                 return data.extract;
             }
 
