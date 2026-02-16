@@ -1,6 +1,6 @@
 /* ======================================
-   ANJALI BRAIN v2
-   Emotion + Intelligence + Knowledge + Name + Language
+   ANJALI BRAIN v2 — FINAL
+   Intent + Emotion + Intelligence + Knowledge + Name + Language
    ====================================== */
 
 var BrainV2 = (function () {
@@ -35,36 +35,60 @@ var BrainV2 = (function () {
         var context = makeContext("normal", null);
         var baseReply = "";
 
-        /* 1️⃣ Emotion First */
-        if (typeof EmotionEngineV2 !== "undefined") {
-            var emoType = EmotionEngineV2.detect(text);
+        /* 1️⃣ Intent Detection (MAIN UNDERSTANDING LAYER) */
+        var intent = "normal";
+        if (typeof IntentEngineV2 !== "undefined") {
+            intent = IntentEngineV2.detect(text);
+        }
 
-            if (emoType) {
-                context = makeContext("emotion", emoType);
+        /* 2️⃣ Emotion Priority */
+        if (intent === "emotion_intent" || intent === "motivation_intent") {
+
+            if (typeof EmotionEngineV2 !== "undefined") {
+                var emoType = EmotionEngineV2.detect(text);
+
+                if (emoType) {
+                    context = makeContext("emotion", emoType);
+                    baseReply = "emotion";
+                }
+            }
+        }
+
+        /* 3️⃣ Love Intent → Emotional + Advice */
+        if (!baseReply && intent === "love_intent") {
+            if (typeof EmotionEngineV2 !== "undefined") {
+                var loveType = EmotionEngineV2.detect(text) || "love";
+                context = makeContext("emotion", loveType);
                 baseReply = "emotion";
             }
         }
 
-        /* 2️⃣ Intelligence */
-        if (baseReply !== "emotion" && typeof IntelligenceEngineV2 !== "undefined") {
-            var intel = IntelligenceEngineV2.respond(text, "");
-            if (intel) {
-                context = makeContext("intelligence", null);
-                baseReply = intel;
+        /* 4️⃣ Advice / Intelligence Layer */
+        if (!baseReply && intent === "advice_intent") {
+            if (typeof IntelligenceEngineV2 !== "undefined") {
+                var intel = IntelligenceEngineV2.respond(text, "");
+                if (intel) {
+                    context = makeContext("intelligence", null);
+                    baseReply = intel;
+                }
             }
         }
 
-        /* 3️⃣ Knowledge (Wikipedia Search) */
-        if (!baseReply && typeof KnowledgeEngineV2 !== "undefined") {
-            var knowledge = await KnowledgeEngineV2.resolve(text);
-            if (knowledge) {
-                context = makeContext("knowledge", null);
-                baseReply = knowledge;
+        /* 5️⃣ Knowledge (Questions + Topic) */
+        if (!baseReply &&
+            (intent === "knowledge_intent" || intent === "topic_intent")
+        ) {
+            if (typeof KnowledgeEngineV2 !== "undefined") {
+                var knowledge = await KnowledgeEngineV2.resolve(text);
+                if (knowledge) {
+                    context = makeContext("knowledge", null);
+                    baseReply = knowledge;
+                }
             }
         }
 
-        /* 4️⃣ Name Detection */
-        if (!baseReply) {
+        /* 6️⃣ Identity */
+        if (!baseReply && intent === "identity_intent") {
             var name = detectName(text);
             if (name) {
                 context = makeContext("name", null);
@@ -72,13 +96,22 @@ var BrainV2 = (function () {
             }
         }
 
-        /* 5️⃣ Normal */
+        /* 7️⃣ General Intelligence fallback */
+        if (!baseReply && typeof IntelligenceEngineV2 !== "undefined") {
+            var fallbackIntel = IntelligenceEngineV2.respond(text, "");
+            if (fallbackIntel) {
+                context = makeContext("intelligence", null);
+                baseReply = fallbackIntel;
+            }
+        }
+
+        /* 8️⃣ Final fallback */
         if (!baseReply) {
             context = makeContext("normal", null);
             baseReply = "normal";
         }
 
-        /* 6️⃣ Language Polish */
+        /* 9️⃣ Language Polishing */
         if (typeof LanguageEngineV2 !== "undefined") {
             return LanguageEngineV2.transform(baseReply, context);
         }
