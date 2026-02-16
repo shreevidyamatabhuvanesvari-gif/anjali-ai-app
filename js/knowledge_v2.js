@@ -1,6 +1,6 @@
 var KnowledgeEngineV2 = (function () {
 
-    const API = "https://hi.wikipedia.org/api/rest_v1/page/summary/";
+    const API = "https://hi.wikipedia.org/w/api.php?action=query&format=json&origin=*&prop=extracts&exintro=1&explaintext=1&titles=";
 
     function cleanTopic(text) {
         return (text || "")
@@ -8,9 +8,6 @@ var KnowledgeEngineV2 = (function () {
             .replace("कौन है", "")
             .replace("कहाँ है", "")
             .replace("कहां है", "")
-            .replace("क्या होता है", "")
-            .replace("बताओ", "")
-            .replace("समझाओ", "")
             .replace("?", "")
             .trim();
     }
@@ -20,34 +17,20 @@ var KnowledgeEngineV2 = (function () {
         try {
 
             let topic = cleanTopic(text);
-
             if (!topic || topic.length < 1) return null;
 
-            /* Try exact topic */
-            let res = await fetch(API + encodeURIComponent(topic));
+            const res = await fetch(API + encodeURIComponent(topic));
+            const data = await res.json();
 
-            if (res.ok) {
-                let data = await res.json();
-                if (data && data.extract) {
-                    return data.extract;
-                }
-            }
+            const pages = data.query.pages;
+            const pageId = Object.keys(pages)[0];
 
-            /* Try first word fallback */
-            let firstWord = topic.split(" ")[0];
-
-            if (firstWord && firstWord.length > 1) {
-                let res2 = await fetch(API + encodeURIComponent(firstWord));
-                if (res2.ok) {
-                    let data2 = await res2.json();
-                    if (data2 && data2.extract) {
-                        return data2.extract;
-                    }
-                }
+            if (pageId && pages[pageId].extract) {
+                return pages[pageId].extract;
             }
 
         } catch (e) {
-            console.log("Knowledge error:", e);
+            console.log("Wiki error:", e);
         }
 
         return null;
