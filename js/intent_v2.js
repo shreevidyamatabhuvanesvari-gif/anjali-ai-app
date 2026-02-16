@@ -1,130 +1,89 @@
 /* ======================================
-   ANJALI INTENT ENGINE v2
-   LEVEL 3+4 Hybrid
-   Deep Understanding + Psychological Intent
+   ANJALI INTENT ENGINE v2 — FINAL STRONG
+   Level 3+4 Hybrid Understanding
+   Handles punctuation + mixed intent
    ====================================== */
 
 var IntentEngineV2 = (function () {
 
     function normalize(text) {
-        return (text || "").toLowerCase().trim();
+        return (text || "")
+            .toLowerCase()
+            .replace(/\?/g, "")
+            .replace(/\./g, "")
+            .replace(/!/g, "")
+            .trim();
     }
-
-    /* ---------- Helper Checks ---------- */
-
-    function hasAny(text, words) {
-        for (var i = 0; i < words.length; i++) {
-            if (text.includes(words[i])) return true;
-        }
-        return false;
-    }
-
-    /* ---------- Intent Detection ---------- */
 
     function detect(text) {
 
         text = normalize(text);
 
-        if (!text) return "normal";
-
-        /* 1️⃣ Identity */
+        /* 1️⃣ Knowledge intent (HIGHEST PRIORITY) */
         if (
-            text.startsWith("मेरा नाम") ||
+            text.includes("क्या है") ||
+            text.includes("क्या होता है") ||
+            text.includes("कौन है") ||
+            text.includes("समझाओ") ||
+            text.includes("बताओ")
+        ) {
+            return "knowledge_intent";
+        }
+
+        /* 2️⃣ Advice intent */
+        if (
+            text.includes("कैसे") ||
+            text.includes("क्या करूँ") ||
+            text.includes("कैसे बताऊँ") ||
+            text.includes("सलाह")
+        ) {
+            return "advice_intent";
+        }
+
+        /* 3️⃣ Emotion intent */
+        if (
+            text.includes("उदास") ||
+            text.includes("दुखी") ||
+            text.includes("अकेला") ||
+            text.includes("परेशान") ||
+            text.includes("खुश")
+        ) {
+            return "emotion_intent";
+        }
+
+        /* 4️⃣ Love intent (non-knowledge only) */
+        if (
+            text.includes("प्यार") &&
+            !text.includes("क्या है") &&
+            !text.includes("कैसे")
+        ) {
+            return "love_intent";
+        }
+
+        /* 5️⃣ Identity */
+        if (
+            text.includes("मेरा नाम") ||
             (text.startsWith("मैं ") && text.includes("हूँ"))
         ) {
             return "identity_intent";
         }
 
-        /* 2️⃣ Knowledge */
-        if (
-            hasAny(text, ["क्या है", "कौन है", "क्या होता है", "समझाओ", "बताओ"])
-        ) {
-            return "knowledge_intent";
-        }
-
-        /* 3️⃣ Advice / Guidance */
-        if (
-            hasAny(text, [
-                "क्या करूँ",
-                "कैसे करूँ",
-                "कैसे बताऊँ",
-                "कैसे कहूँ",
-                "सलाह",
-                "मदद"
-            ])
-        ) {
-            return "advice_intent";
-        }
-
-        /* 4️⃣ Love / Relationship */
-        if (
-            hasAny(text, [
-                "प्यार",
-                "love",
-                "दिल",
-                "relationship",
-                "उससे",
-                "इज़हार"
-            ])
-        ) {
-            return "love_intent";
-        }
-
-        /* 5️⃣ Emotional State */
-        if (
-            hasAny(text, [
-                "उदास",
-                "दुखी",
-                "अकेला",
-                "परेशान",
-                "तनाव",
-                "थक गया",
-                "खुश",
-                "डर"
-            ])
-        ) {
-            return "emotion_intent";
-        }
-
         /* 6️⃣ Motivation */
         if (
-            hasAny(text, [
-                "मन नहीं लगता",
-                "कुछ करने का मन नहीं",
-                "कुछ करने का मन नहीं करता",
-                "थक गया हूँ",
-                "उत्साह नहीं"
-            ])
+            text.includes("मन नहीं") ||
+            text.includes("कुछ करने का मन")
         ) {
             return "motivation_intent";
         }
 
-        /* 7️⃣ Existential / Deep Thinking */
-        if (
-            hasAny(text, [
-                "जीवन का मतलब",
-                "मैं कौन हूँ",
-                "जीने का कारण",
-                "सब क्यों",
-                "अस्तित्व"
-            ])
-        ) {
-            return "existential_intent";
-        }
-
-        /* 8️⃣ Topic Only (1–3 words) */
+        /* 7️⃣ Topic only (1–3 words) */
         var words = text.split(" ");
-        if (
-            words.length <= 3 &&
-            !hasAny(text, ["मैं", "मेरा", "क्या", "कैसे"])
-        ) {
+        if (words.length <= 3) {
             return "topic_intent";
         }
 
         return "normal";
     }
-
-    /* ---------- Public API ---------- */
 
     return {
         detect: detect
