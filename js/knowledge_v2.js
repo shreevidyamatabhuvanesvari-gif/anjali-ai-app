@@ -1,16 +1,9 @@
-/* ======================================
-   ANJALI KNOWLEDGE ENGINE v2 — FINAL FIXED
-   Wikipedia Concept + Fact Hybrid
-   ====================================== */
-
 var KnowledgeEngineV2 = (function () {
 
     const API = "https://hi.wikipedia.org/api/rest_v1/page/summary/";
 
-    /* ---------- Clean Topic ---------- */
     function cleanTopic(text) {
         return (text || "")
-            .toLowerCase()
             .replace("क्या है", "")
             .replace("कौन है", "")
             .replace("कहाँ है", "")
@@ -18,74 +11,49 @@ var KnowledgeEngineV2 = (function () {
             .replace("क्या होता है", "")
             .replace("बताओ", "")
             .replace("समझाओ", "")
+            .replace("?", "")
             .trim();
     }
 
-    /* ---------- Guess Topic ---------- */
-    function guessTopic(text) {
-
-        let t = cleanTopic(text);
-
-        if (t.length > 2) return t;
-
-        return (text || "").trim();
-    }
-
-    /* ---------- Wikipedia Search ---------- */
-    async function search(topicText) {
+    async function resolve(text) {
 
         try {
 
-            let topic = guessTopic(topicText);
-            if (!topic || topic.length < 2) return null;
+            let topic = cleanTopic(text);
 
-            const res = await fetch(API + encodeURIComponent(topic));
+            if (!topic || topic.length < 1) return null;
 
-            if (!res.ok) return null;
+            /* Try exact topic */
+            let res = await fetch(API + encodeURIComponent(topic));
 
-            const data = await res.json();
-
-            if (data && data.extract) {
-                return data.extract;
+            if (res.ok) {
+                let data = await res.json();
+                if (data && data.extract) {
+                    return data.extract;
+                }
             }
 
-            return null;
+            /* Try first word fallback */
+            let firstWord = topic.split(" ")[0];
+
+            if (firstWord && firstWord.length > 1) {
+                let res2 = await fetch(API + encodeURIComponent(firstWord));
+                if (res2.ok) {
+                    let data2 = await res2.json();
+                    if (data2 && data2.extract) {
+                        return data2.extract;
+                    }
+                }
+            }
 
         } catch (e) {
-            console.log("Wiki error:", e);
-            return null;
-        }
-    }
-
-    /* ---------- Knowledge Resolver ---------- */
-    async function resolve(text) {
-
-        let topic = guessTopic(text);
-
-        /* 1️⃣ Learning Cache Check */
-        if (typeof LearningEngineV2 !== "undefined" && LearningEngineV2.get) {
-            let cached = LearningEngineV2.get(topic);
-            if (cached) return cached;
-        }
-
-        /* 2️⃣ Wikipedia Search */
-        let info = await search(topic);
-
-        if (info) {
-
-            /* 3️⃣ Save Learning */
-            if (typeof LearningEngineV2 !== "undefined" && LearningEngineV2.set) {
-                LearningEngineV2.set(topic, info);
-            }
-
-            return info;
+            console.log("Knowledge error:", e);
         }
 
         return null;
     }
 
     return {
-        search: search,
         resolve: resolve
     };
 
