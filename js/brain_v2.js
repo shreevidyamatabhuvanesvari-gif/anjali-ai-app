@@ -26,58 +26,85 @@ var BrainV2 = (function () {
 
     async function respond(userText) {
 
-        var text = (userText || "").toString();
-        var context = makeContext("normal", null);
-        var baseReply = "";
+        try {
 
-        /* 🔥 ALWAYS TRY KNOWLEDGE FIRST */
-        if (typeof KnowledgeEngineV2 !== "undefined") {
-            var knowledge = await KnowledgeEngineV2.resolve(text);
-            if (knowledge) {
-                context = makeContext("knowledge", null);
-                baseReply = knowledge;
+            var text = (userText || "").toString();
+            var context = makeContext("normal", null);
+            var baseReply = "";
+
+            /* 🔥 KNOWLEDGE FIRST */
+            try {
+                if (typeof KnowledgeEngineV2 !== "undefined") {
+                    var knowledge = await KnowledgeEngineV2.resolve(text);
+                    if (knowledge) {
+                        context = makeContext("knowledge", null);
+                        baseReply = knowledge;
+                    }
+                }
+            } catch (e) {
+                console.log("Knowledge error:", e);
             }
-        }
 
-        /* Emotion */
-        if (!baseReply && typeof EmotionEngineV2 !== "undefined") {
-            var emoType = EmotionEngineV2.detect(text);
-            if (emoType) {
-                context = makeContext("emotion", emoType);
-                baseReply = "emotion";
+            /* Emotion */
+            try {
+                if (!baseReply && typeof EmotionEngineV2 !== "undefined") {
+                    var emoType = EmotionEngineV2.detect(text);
+                    if (emoType) {
+                        context = makeContext("emotion", emoType);
+                        baseReply = "emotion";
+                    }
+                }
+            } catch (e) {
+                console.log("Emotion error:", e);
             }
-        }
 
-        /* Intelligence */
-        if (!baseReply && typeof IntelligenceEngineV2 !== "undefined") {
-            var intel = IntelligenceEngineV2.respond(text, "");
-            if (intel) {
-                context = makeContext("intelligence", null);
-                baseReply = intel;
+            /* Intelligence */
+            try {
+                if (!baseReply && typeof IntelligenceEngineV2 !== "undefined") {
+                    var intel = IntelligenceEngineV2.respond(text, "");
+                    if (intel) {
+                        context = makeContext("intelligence", null);
+                        baseReply = intel;
+                    }
+                }
+            } catch (e) {
+                console.log("Intelligence error:", e);
             }
-        }
 
-        /* Name */
-        if (!baseReply) {
-            var name = detectName(text);
-            if (name) {
-                context = makeContext("name", null);
-                baseReply = "अच्छा… तो तुम्हारा नाम " + name + " है।";
+            /* Name */
+            try {
+                if (!baseReply) {
+                    var name = detectName(text);
+                    if (name) {
+                        context = makeContext("name", null);
+                        baseReply = "अच्छा… तो तुम्हारा नाम " + name + " है।";
+                    }
+                }
+            } catch (e) {
+                console.log("Name detect error:", e);
             }
-        }
 
-        /* Fallback */
-        if (!baseReply) {
-            context = makeContext("normal", null);
-            baseReply = "normal";
-        }
+            /* Fallback */
+            if (!baseReply) {
+                context = makeContext("normal", null);
+                baseReply = "normal";
+            }
 
-        /* Language polish */
-        if (typeof LanguageEngineV2 !== "undefined") {
-            return LanguageEngineV2.transform(baseReply, context);
-        }
+            /* Language polish */
+            try {
+                if (typeof LanguageEngineV2 !== "undefined") {
+                    return LanguageEngineV2.transform(baseReply, context);
+                }
+            } catch (e) {
+                console.log("Language error:", e);
+            }
 
-        return baseReply;
+            return baseReply;
+
+        } catch (mainError) {
+            console.log("Brain crash:", mainError);
+            return "मैं अभी ठीक से जवाब नहीं दे पा रही…";
+        }
     }
 
     return {
