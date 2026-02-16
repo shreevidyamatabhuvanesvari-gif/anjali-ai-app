@@ -1,12 +1,5 @@
-/* ======================================
-   ANJALI BRAIN v2 — FINAL (Language Integrated)
-   Router: Emotion → Intelligence → Name → Normal
-   All replies pass through LanguageEngineV2
-   ====================================== */
-
 var BrainV2 = (function () {
 
-    /* ---------- Context Builder ---------- */
     function makeContext(type, emotion) {
         return {
             type: type || "normal",
@@ -14,7 +7,6 @@ var BrainV2 = (function () {
         };
     }
 
-    /* ---------- Name Detection ---------- */
     function detectName(text) {
         text = (text || "").trim();
 
@@ -22,7 +14,7 @@ var BrainV2 = (function () {
             var name = text.replace("मेरा नाम", "").replace("है", "").trim();
 
             if (name.length > 1) {
-                if (typeof MemoryEngineV2 !== "undefined" && MemoryEngineV2.setName) {
+                if (typeof MemoryEngineV2 !== "undefined") {
                     MemoryEngineV2.setName(name);
                 }
                 return name;
@@ -32,29 +24,25 @@ var BrainV2 = (function () {
         return null;
     }
 
-    /* ---------- Normal Base Reply ---------- */
-    function normalBase() {
-        return "मैं सुन रही हूँ… और बताओ।";
-    }
-
-    /* ---------- MAIN ENGINE ---------- */
     async function respond(userText) {
 
         var text = (userText || "").toString();
-        var baseReply = "";
         var context = makeContext("normal", null);
+        var baseReply = "";
 
         /* 1️⃣ Emotion First */
-        if (typeof EmotionEngineV2 !== "undefined" && EmotionEngineV2.detect) {
+        if (typeof EmotionEngineV2 !== "undefined") {
             var emoType = EmotionEngineV2.detect(text);
+
             if (emoType) {
                 context = makeContext("emotion", emoType);
-                baseReply = ""; // Language engine will build full reply
+                baseReply = "emotion"; 
+                // signal for language engine
             }
         }
 
         /* 2️⃣ Intelligence */
-        if (!context.emotion && typeof IntelligenceEngineV2 !== "undefined") {
+        if (baseReply !== "emotion" && typeof IntelligenceEngineV2 !== "undefined") {
             var intel = IntelligenceEngineV2.respond(text, "");
             if (intel) {
                 context = makeContext("intelligence", null);
@@ -66,23 +54,20 @@ var BrainV2 = (function () {
         if (!baseReply) {
             var name = detectName(text);
             if (name) {
-                baseReply = "अच्छा… तो तुम्हारा नाम " + name + " है।";
                 context = makeContext("name", null);
+                baseReply = "अच्छा… तो तुम्हारा नाम " + name + " है।";
             }
         }
 
-        if (!baseReply && !context.emotion) {
-    baseReply = normalBase();
-    context = makeContext("normal", null);
-}
+        /* 4️⃣ Normal */
+        if (!baseReply) {
+            context = makeContext("normal", null);
+            baseReply = "normal";
+        }
 
-        /* 5️⃣ Language Layer (FINAL TRANSFORM) */
-        if (typeof LanguageEngineV2 !== "undefined" && LanguageEngineV2.transform) {
-            try {
-                return LanguageEngineV2.transform(baseReply, context);
-            } catch (e) {
-                console.log("Language transform error:", e);
-            }
+        /* 5️⃣ Language Transform */
+        if (typeof LanguageEngineV2 !== "undefined") {
+            return LanguageEngineV2.transform(baseReply, context);
         }
 
         return baseReply;
