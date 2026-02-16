@@ -1,3 +1,9 @@
+/* ======================================
+   ANJALI BRAIN v2 — FINAL STABLE
+   Knowledge FIRST + Emotion + Intelligence
+   Full Error Safe
+   ====================================== */
+
 var BrainV2 = (function () {
 
     function makeContext(type, emotion) {
@@ -32,10 +38,23 @@ var BrainV2 = (function () {
             var context = makeContext("normal", null);
             var baseReply = "";
 
-            /* 🔥 KNOWLEDGE FIRST */
+            /* 🔥 KNOWLEDGE FIRST — FINAL FIXED */
             try {
                 if (typeof KnowledgeEngineV2 !== "undefined") {
-                    var knowledge = await KnowledgeEngineV2.resolve(text);
+
+                    var cleaned = text
+                        .replace("क्या है", "")
+                        .replace("कौन है", "")
+                        .replace("कहाँ है", "")
+                        .replace("कहां है", "")
+                        .replace("क्या होता है", "")
+                        .replace("?", "")
+                        .trim();
+
+                    var knowledge =
+                        await KnowledgeEngineV2.resolve(cleaned) ||
+                        await KnowledgeEngineV2.resolve(text);
+
                     if (knowledge) {
                         context = makeContext("knowledge", null);
                         baseReply = knowledge;
@@ -71,7 +90,7 @@ var BrainV2 = (function () {
                 console.log("Intelligence error:", e);
             }
 
-            /* Name */
+            /* Name detect */
             try {
                 if (!baseReply) {
                     var name = detectName(text);
