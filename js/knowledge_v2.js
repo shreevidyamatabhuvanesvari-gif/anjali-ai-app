@@ -1,32 +1,48 @@
-/* ======================================
-   ANJALI KNOWLEDGE ENGINE
-   Wikipedia Free Knowledge Fetch
-   ====================================== */
+var KnowledgeEngineV2 = (function () {
 
-var KnowledgeEngine = (function () {
+    const API = "https://hi.wikipedia.org/api/rest_v1/page/summary/";
 
-    async function search(topic) {
+    function extractTopic(text) {
+
+        text = (text || "")
+            .toLowerCase()
+            .replace("क्या है", "")
+            .replace("क्या होता है", "")
+            .replace("कौन है", "")
+            .replace("बताओ", "")
+            .replace("समझाओ", "")
+            .replace(/\?/g, "")
+            .trim();
+
+        return text;
+    }
+
+    async function resolve(text) {
+
+        let topic = extractTopic(text);
+
+        if (!topic || topic.length < 2) return null;
+
         try {
-            var url = "https://hi.wikipedia.org/api/rest_v1/page/summary/" + encodeURIComponent(topic);
-            var res = await fetch(url);
+            const res = await fetch(API + encodeURIComponent(topic));
 
             if (!res.ok) return null;
 
-            var data = await res.json();
+            const data = await res.json();
 
             if (data.extract) {
                 return data.extract;
             }
 
+            return null;
+
         } catch (e) {
             return null;
         }
-
-        return null;
     }
 
     return {
-        search: search
+        resolve: resolve
     };
 
 })();
