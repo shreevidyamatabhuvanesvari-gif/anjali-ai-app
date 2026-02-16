@@ -1,6 +1,6 @@
 /* ======================================
-   ANJALI BRAIN v2 — FINAL FIXED
-   Intent + Knowledge FIRST + Emotion + Intelligence
+   ANJALI BRAIN v2 — FINAL HARD FIX
+   Knowledge ALWAYS CHECKED FIRST
    ====================================== */
 
 var BrainV2 = (function () {
@@ -35,24 +35,22 @@ var BrainV2 = (function () {
         var context = makeContext("normal", null);
         var baseReply = "";
 
-        /* 1️⃣ Intent Detection */
-        var intent = "normal";
-        if (typeof IntentEngineV2 !== "undefined") {
-            intent = IntentEngineV2.detect(text);
-        }
-
-        /* 2️⃣ KNOWLEDGE FIRST (MOST IMPORTANT FIX) */
-        if (intent === "knowledge_intent" || intent === "topic_intent") {
-            if (typeof KnowledgeEngineV2 !== "undefined") {
-                var knowledge = await KnowledgeEngineV2.resolve(text);
-                if (knowledge) {
-                    context = makeContext("knowledge", null);
-                    baseReply = knowledge;
-                }
+        /* 1️⃣ ALWAYS TRY KNOWLEDGE FIRST */
+        if (typeof KnowledgeEngineV2 !== "undefined") {
+            var knowledge = await KnowledgeEngineV2.resolve(text);
+            if (knowledge) {
+                context = makeContext("knowledge", null);
+                baseReply = knowledge;
             }
         }
 
-        /* 3️⃣ Advice / Intelligence */
+        /* 2️⃣ Intent Detection */
+        var intent = "normal";
+        if (!baseReply && typeof IntentEngineV2 !== "undefined") {
+            intent = IntentEngineV2.detect(text);
+        }
+
+        /* 3️⃣ Advice */
         if (!baseReply && intent === "advice_intent") {
             if (typeof IntelligenceEngineV2 !== "undefined") {
                 var intel = IntelligenceEngineV2.respond(text, "");
@@ -64,29 +62,16 @@ var BrainV2 = (function () {
         }
 
         /* 4️⃣ Emotion */
-        if (!baseReply &&
-            (intent === "emotion_intent" || intent === "motivation_intent")
-        ) {
-            if (typeof EmotionEngineV2 !== "undefined") {
-                var emoType = EmotionEngineV2.detect(text);
-                if (emoType) {
-                    context = makeContext("emotion", emoType);
-                    baseReply = "emotion";
-                }
-            }
-        }
-
-        /* 5️⃣ Love (emotional mode) */
-        if (!baseReply && intent === "love_intent") {
-            if (typeof EmotionEngineV2 !== "undefined") {
-                var loveType = EmotionEngineV2.detect(text) || "love";
-                context = makeContext("emotion", loveType);
+        if (!baseReply && typeof EmotionEngineV2 !== "undefined") {
+            var emoType = EmotionEngineV2.detect(text);
+            if (emoType) {
+                context = makeContext("emotion", emoType);
                 baseReply = "emotion";
             }
         }
 
-        /* 6️⃣ Identity */
-        if (!baseReply && intent === "identity_intent") {
+        /* 5️⃣ Identity */
+        if (!baseReply) {
             var name = detectName(text);
             if (name) {
                 context = makeContext("name", null);
@@ -94,7 +79,7 @@ var BrainV2 = (function () {
             }
         }
 
-        /* 7️⃣ Intelligence fallback */
+        /* 6️⃣ Intelligence fallback */
         if (!baseReply && typeof IntelligenceEngineV2 !== "undefined") {
             var fallbackIntel = IntelligenceEngineV2.respond(text, "");
             if (fallbackIntel) {
@@ -103,13 +88,13 @@ var BrainV2 = (function () {
             }
         }
 
-        /* 8️⃣ Final fallback */
+        /* 7️⃣ Final fallback */
         if (!baseReply) {
             context = makeContext("normal", null);
             baseReply = "normal";
         }
 
-        /* 9️⃣ Language polish */
+        /* 8️⃣ Language polish */
         if (typeof LanguageEngineV2 !== "undefined") {
             return LanguageEngineV2.transform(baseReply, context);
         }
