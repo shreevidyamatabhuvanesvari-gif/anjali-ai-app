@@ -82,14 +82,39 @@ window.onload = function () {
     input.focus();
 };
 
-/* ---------- Optional: Mic Support ---------- */
+/* ======================================
+   🎤 REAL VOICE INPUT (STT)
+   ====================================== */
+
 function startListening() {
-    if (typeof startSTT === "function") {
-        startSTT(function (spokenText) {
-            input.value = spokenText;
-            sendMessage();
-        });
-    } else {
-        alert("Voice input उपलब्ध नहीं है।");
+
+    const SpeechRecognition =
+        window.SpeechRecognition || window.webkitSpeechRecognition;
+
+    if (!SpeechRecognition) {
+        alert("इस ब्राउज़र में Voice Input supported नहीं है");
+        return;
     }
+
+    const recognition = new SpeechRecognition();
+
+    recognition.lang = "hi-IN";
+    recognition.continuous = false;
+    recognition.interimResults = false;
+
+    recognition.start();
+
+    recognition.onresult = function (event) {
+
+        const spokenText = event.results[0][0].transcript;
+
+        input.value = spokenText;
+
+        // Auto send message
+        sendMessage();
+    };
+
+    recognition.onerror = function () {
+        alert("Mic access नहीं मिला या voice detect नहीं हुआ");
+    };
 }
