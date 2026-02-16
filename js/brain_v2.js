@@ -71,11 +71,10 @@ var BrainV2 = (function () {
             }
         }
 
-        /* 4️⃣ Normal */
-        if (!baseReply) {
-            baseReply = normalBase();
-            context = makeContext("normal", null);
-        }
+        if (!baseReply && !context.emotion) {
+    baseReply = normalBase();
+    context = makeContext("normal", null);
+}
 
         /* 5️⃣ Language Layer (FINAL TRANSFORM) */
         if (typeof LanguageEngineV2 !== "undefined" && LanguageEngineV2.transform) {
