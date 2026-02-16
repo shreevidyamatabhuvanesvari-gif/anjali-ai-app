@@ -1,6 +1,6 @@
 /* ======================================
    ANJALI SCRIPT v2
-   Chat Controller + BrainV2 Connector
+   Chat Controller + BrainV2 + Voice Input
    Supports: memory_v2 + emotion_v2 + voice_v2
    ====================================== */
 
@@ -46,7 +46,6 @@ async function sendMessage() {
 
         let reply = "";
 
-        /* Use BrainV2 if available */
         if (typeof BrainV2 !== "undefined") {
             reply = await BrainV2.respond(text);
         }
