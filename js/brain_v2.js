@@ -1,7 +1,7 @@
 /* ======================================
-   ANJALI BRAIN v2 — UNIVERSAL KNOWLEDGE MODE
-   Knowledge → Emotion → Intelligence → Name
-   Strong Universal Detection
+   ANJALI BRAIN v2 — UNIVERSAL THINKING MODE
+   Knowledge → Thinking → Emotion → Intelligence → Name
+   Fully Compatible with all v2 Engines
    ====================================== */
 
 var BrainV2 = (function () {
@@ -18,7 +18,7 @@ var BrainV2 = (function () {
 
         text = (text || "").toLowerCase().trim();
 
-        // बहुत छोटे शब्द = topic
+        // 1–2 शब्द = topic query
         if (text.split(" ").length <= 2 && text.length > 2) {
             return true;
         }
@@ -80,7 +80,7 @@ var BrainV2 = (function () {
             var context = makeContext("normal", null);
             var baseReply = "";
 
-            /* 🔥 1️⃣ UNIVERSAL KNOWLEDGE FIRST */
+            /* 🔥 1️⃣ KNOWLEDGE FIRST (UNIVERSAL MODE) */
             try {
 
                 if (isKnowledgeQuery(text) && typeof KnowledgeEngineV2 !== "undefined") {
@@ -101,7 +101,13 @@ var BrainV2 = (function () {
                         await KnowledgeEngineV2.resolve(text);
 
                     if (knowledge) {
-                        return knowledge;   // ⭐ Direct return
+
+                        /* ⭐ THINKING LAYER (MOST IMPORTANT) */
+                        if (typeof LanguageThinkingEngineV2 !== "undefined") {
+                            return LanguageThinkingEngineV2.transform(knowledge, text);
+                        }
+
+                        return knowledge;
                     }
                 }
 
@@ -159,9 +165,13 @@ var BrainV2 = (function () {
                 baseReply = "normal";
             }
 
-            /* 6️⃣ Language polish */
-            if (typeof LanguageEngineV2 !== "undefined") {
-                return LanguageEngineV2.transform(baseReply, context);
+            /* 6️⃣ Language polish (emotional tone) */
+            try {
+                if (typeof LanguageEngineV2 !== "undefined") {
+                    return LanguageEngineV2.transform(baseReply, context);
+                }
+            } catch (e) {
+                console.log("Language error:", e);
             }
 
             return baseReply;
