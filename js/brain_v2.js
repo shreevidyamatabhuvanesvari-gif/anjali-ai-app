@@ -1,10 +1,12 @@
 /* ======================================
-   ANJALI BRAIN v2 — ULTRA STABLE MODE
-   Strong Knowledge Lock + Topic Detection
+   ANJALI BRAIN v2 — FINAL STABLE CORE
+   Knowledge → Fact → Emotion → Intelligence → Name
+   Variable Length Answer System
    ====================================== */
 
 var BrainV2 = (function () {
 
+    /* ---------- Context Builder ---------- */
     function makeContext(type, emotion) {
         return {
             type: type || "normal",
@@ -12,33 +14,33 @@ var BrainV2 = (function () {
         };
     }
 
+    /* ---------- Knowledge Detection ---------- */
     function isKnowledgeQuery(text) {
 
         text = (text || "").toLowerCase().trim();
 
-        // 1️⃣ Short topic
-        if (text.split(" ").length <= 4 && text.length > 2) {
+        // Single topic words
+        if (text.split(" ").length <= 2 && text.length > 2)
             return true;
-        }
 
-        // 2️⃣ Question words
+        // Question patterns
         if (
             text.includes("क्या") ||
             text.includes("कौन") ||
             text.includes("कहाँ") ||
             text.includes("कहां") ||
             text.includes("कब") ||
-            text.includes("किसने") ||
             text.includes("क्यों") ||
             text.includes("कैसे") ||
+            text.includes("कितना") ||
+            text.includes("कितने") ||
             text.includes("?")
-        ) {
-            return true;
-        }
+        ) return true;
 
         return false;
     }
 
+    /* ---------- Name Detection ---------- */
     function detectName(text) {
 
         text = (text || "").trim();
@@ -61,31 +63,32 @@ var BrainV2 = (function () {
         return null;
     }
 
+    /* ---------- MAIN RESPONSE ---------- */
     async function respond(userText) {
 
         try {
 
-            var text = (userText || "").toString().trim();
+            var text = (userText || "").toString();
             var context = makeContext("normal", null);
             var baseReply = "";
 
-            /* 🔥 KNOWLEDGE FIRST (LOCKED) */
+            /* 🔥 1️⃣ KNOWLEDGE FIRST */
             if (isKnowledgeQuery(text) && typeof KnowledgeEngineV2 !== "undefined") {
 
-                var knowledge = await KnowledgeEngineV2.resolve(text);
+                let knowledge = await KnowledgeEngineV2.resolve(text);
 
                 if (knowledge) {
 
-                    // Thinking engine apply
-                    if (typeof LanguageThinkingEngineV2 !== "undefined") {
-                        return LanguageThinkingEngineV2.transform(knowledge, text);
+                    // Fact extraction (length control)
+                    if (typeof FactExtractorV2 !== "undefined") {
+                        return FactExtractorV2.extract(knowledge, text);
                     }
 
                     return knowledge;
                 }
             }
 
-            /* Emotion */
+            /* 2️⃣ Emotion */
             if (typeof EmotionEngineV2 !== "undefined") {
 
                 var emoType = EmotionEngineV2.detect(text);
@@ -96,7 +99,7 @@ var BrainV2 = (function () {
                 }
             }
 
-            /* Intelligence */
+            /* 3️⃣ Intelligence */
             if (!baseReply && typeof IntelligenceEngineV2 !== "undefined") {
 
                 var intel = IntelligenceEngineV2.respond(text, "");
@@ -107,22 +110,22 @@ var BrainV2 = (function () {
                 }
             }
 
-            /* Name */
+            /* 4️⃣ Name */
             if (!baseReply) {
 
                 var name = detectName(text);
 
                 if (name) {
-                    context = makeContext("name", null);
                     baseReply = "अच्छा… तो तुम्हारा नाम " + name + " है।";
                 }
             }
 
-            /* Fallback */
+            /* 5️⃣ Fallback */
             if (!baseReply) {
                 baseReply = "normal";
             }
 
+            /* 6️⃣ Language Polish */
             if (typeof LanguageEngineV2 !== "undefined") {
                 return LanguageEngineV2.transform(baseReply, context);
             }
@@ -130,8 +133,8 @@ var BrainV2 = (function () {
             return baseReply;
 
         } catch (e) {
-            console.log("Brain crash:", e);
-            return "मैं अभी ठीक से जवाब नहीं दे पा रही…";
+            console.log("Brain error:", e);
+            return "मैं अभी ठीक से उत्तर नहीं दे पा रही…";
         }
     }
 
