@@ -1,62 +1,68 @@
 /* ======================================
-   ANJALI ANSWER SELECTOR ENGINE v2
-   Smart Sentence Picker
-   Extracts best line from Wikipedia text
+   ANJALI ANSWER SELECTOR v2 — SMART FILTER
+   Context Based Line Picker
    ====================================== */
 
 var AnswerSelectorEngineV2 = (function () {
 
-    /* ---------- Split into Sentences ---------- */
-    function splitSentences(text) {
-        if (!text) return [];
-
-        return text
-            .replace(/\n/g, " ")
-            .split(/[।.!?]/)
-            .map(s => s.trim())
-            .filter(s => s.length > 15);
+    function splitLines(text) {
+        return text.split("।");
     }
 
-    /* ---------- Keyword Score ---------- */
-    function score(sentence, query) {
+    function score(line, query) {
 
-        var q = query.toLowerCase();
-        var s = sentence.toLowerCase();
+        line = line.toLowerCase();
+        query = query.toLowerCase();
 
-        var words = q.split(" ");
-        var score = 0;
+        var s = 0;
 
-        words.forEach(w => {
-            if (w.length > 2 && s.includes(w)) {
-                score += 2;
-            }
+        /* YEAR detection */
+        if (query.includes("कब") || query.includes("वर्ष")) {
+            if (line.match(/\d{3,4}/)) s += 5;
+        }
+
+        /* NUMBER detection */
+        if (query.includes("कितने") || query.includes("संख्या")) {
+            if (line.match(/\d/)) s += 4;
+        }
+
+        /* PERSON detection */
+        if (query.includes("कौन")) {
+            if (line.includes("थे") || line.includes("हैं")) s += 2;
+        }
+
+        /* LOCATION */
+        if (query.includes("कहाँ") || query.includes("राजधानी")) {
+            if (line.includes("स्थित") || line.includes("राजधानी")) s += 3;
+        }
+
+        /* word overlap bonus */
+        var words = query.split(" ");
+        words.forEach(function (w) {
+            if (line.includes(w)) s += 1;
         });
 
-        if (s.includes("राजधानी")) score += 3;
-        if (s.includes("संख्या")) score += 3;
-        if (s.includes("कब")) score += 3;
-
-        return score;
+        return s;
     }
 
-    /* ---------- Best Sentence Finder ---------- */
     function pickBest(text, query) {
 
-        var sentences = splitSentences(text);
-        if (sentences.length === 0) return text;
+        if (!text) return text;
 
-        var best = sentences[0];
+        var lines = splitLines(text);
+
+        var best = lines[0];
         var bestScore = 0;
 
-        sentences.forEach(s => {
-            var sc = score(s, query);
+        lines.forEach(function (l) {
+            var sc = score(l, query);
             if (sc > bestScore) {
                 bestScore = sc;
-                best = s;
+                best = l;
             }
         });
 
-        return best;
+        return best.trim() + "।";
     }
 
     return {
