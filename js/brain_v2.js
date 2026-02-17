@@ -1,6 +1,6 @@
 /* ======================================
-   ANJALI BRAIN v2 — FINAL REAL FIX
-   Knowledge Priority Lock
+   ANJALI BRAIN v2 — FINAL REAL FIX (STABLE)
+   Knowledge Priority Lock + Error Safe
    ====================================== */
 
 var BrainV2 = (function () {
@@ -19,7 +19,7 @@ var BrainV2 = (function () {
             var name = text.replace("मेरा नाम", "").replace("है", "").trim();
 
             if (name.length > 1) {
-                if (typeof MemoryEngineV2 !== "undefined") {
+                if (typeof MemoryEngineV2 !== "undefined" && MemoryEngineV2.setName) {
                     MemoryEngineV2.setName(name);
                 }
                 return name;
@@ -33,13 +33,17 @@ var BrainV2 = (function () {
 
         try {
 
-            var text = (userText || "").toString();
+            var text = (userText || "").toString().trim();
             var context = makeContext("normal", null);
             var baseReply = "";
 
-            /* 🔥 KNOWLEDGE FIRST */
+            /* =================================================
+               🔥 KNOWLEDGE FIRST — HARD LOCK (FINAL FIX)
+               ================================================= */
+
             try {
-                if (typeof KnowledgeEngineV2 !== "undefined") {
+
+                if (typeof KnowledgeEngineV2 !== "undefined" && KnowledgeEngineV2.resolve) {
 
                     var cleaned = text
                         .replace("क्या है", "")
@@ -47,60 +51,87 @@ var BrainV2 = (function () {
                         .replace("कहाँ है", "")
                         .replace("कहां है", "")
                         .replace("क्या होता है", "")
-                        .replace("?", "")
+                        .replace("बताओ", "")
+                        .replace("समझाओ", "")
+                        .replace(/\?/g, "")
                         .trim();
 
                     var knowledge =
                         await KnowledgeEngineV2.resolve(cleaned) ||
                         await KnowledgeEngineV2.resolve(text);
 
-                    if (knowledge) {
-                        return knowledge;   // ⭐⭐⭐ DIRECT RETURN (MOST IMPORTANT FIX)
+                    /* ⭐ DIRECT RETURN — NO LANGUAGE PROCESSING */
+                    if (knowledge && knowledge.length > 20) {
+                        return knowledge;
                     }
                 }
+
             } catch (e) {
                 console.log("Knowledge error:", e);
             }
 
-            /* Emotion */
+            /* ================= Emotion Layer ================= */
+
             try {
-                if (typeof EmotionEngineV2 !== "undefined") {
+                if (typeof EmotionEngineV2 !== "undefined" && EmotionEngineV2.detect) {
+
                     var emoType = EmotionEngineV2.detect(text);
+
                     if (emoType) {
                         context = makeContext("emotion", emoType);
                         baseReply = "emotion";
                     }
                 }
-            } catch (e) {}
+            } catch (e) {
+                console.log("Emotion error:", e);
+            }
 
-            /* Intelligence */
+            /* ================= Intelligence Layer ================= */
+
             try {
-                if (!baseReply && typeof IntelligenceEngineV2 !== "undefined") {
+                if (!baseReply &&
+                    typeof IntelligenceEngineV2 !== "undefined" &&
+                    IntelligenceEngineV2.respond) {
+
                     var intel = IntelligenceEngineV2.respond(text, "");
+
                     if (intel) {
                         context = makeContext("intelligence", null);
                         baseReply = intel;
                     }
                 }
-            } catch (e) {}
-
-            /* Name */
-            if (!baseReply) {
-                var name = detectName(text);
-                if (name) {
-                    context = makeContext("name", null);
-                    baseReply = "अच्छा… तो तुम्हारा नाम " + name + " है।";
-                }
+            } catch (e) {
+                console.log("Intelligence error:", e);
             }
 
-            /* Fallback */
+            /* ================= Name Detection ================= */
+
+            try {
+                if (!baseReply) {
+                    var name = detectName(text);
+                    if (name) {
+                        context = makeContext("name", null);
+                        baseReply = "अच्छा… तो तुम्हारा नाम " + name + " है।";
+                    }
+                }
+            } catch (e) {
+                console.log("Name detect error:", e);
+            }
+
+            /* ================= Final Fallback ================= */
+
             if (!baseReply) {
                 baseReply = "normal";
             }
 
-            /* Language Polish */
-            if (typeof LanguageEngineV2 !== "undefined") {
-                return LanguageEngineV2.transform(baseReply, context);
+            /* ================= Language Polish ================= */
+
+            try {
+                if (typeof LanguageEngineV2 !== "undefined" && LanguageEngineV2.transform) {
+                    return LanguageEngineV2.transform(baseReply, context);
+                }
+            } catch (e) {
+                console.log("Language error:", e);
             }
 
             return baseReply;
