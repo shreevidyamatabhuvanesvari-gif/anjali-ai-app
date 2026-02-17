@@ -1,8 +1,3 @@
-/* ======================================
-   ANJALI BRAIN v2 — FINAL REAL FIX (STABLE)
-   Knowledge Priority Lock + Error Safe
-   ====================================== */
-
 var BrainV2 = (function () {
 
     function makeContext(type, emotion) {
@@ -12,6 +7,18 @@ var BrainV2 = (function () {
         };
     }
 
+    function isKnowledgeQuestion(text) {
+        text = (text || "").toLowerCase();
+
+        return (
+            text.includes("क्या है") ||
+            text.includes("क्या होता है") ||
+            text.includes("कौन है") ||
+            text.includes("कहाँ है") ||
+            text.includes("कहां है")
+        );
+    }
+
     function detectName(text) {
         text = (text || "").trim();
 
@@ -19,7 +26,7 @@ var BrainV2 = (function () {
             var name = text.replace("मेरा नाम", "").replace("है", "").trim();
 
             if (name.length > 1) {
-                if (typeof MemoryEngineV2 !== "undefined" && MemoryEngineV2.setName) {
+                if (typeof MemoryEngineV2 !== "undefined") {
                     MemoryEngineV2.setName(name);
                 }
                 return name;
@@ -33,105 +40,69 @@ var BrainV2 = (function () {
 
         try {
 
-            var text = (userText || "").toString().trim();
+            var text = (userText || "").toString();
             var context = makeContext("normal", null);
             var baseReply = "";
 
-            /* =================================================
-               🔥 KNOWLEDGE FIRST — HARD LOCK (FINAL FIX)
-               ================================================= */
+            /* 🔥 STRICT KNOWLEDGE LOCK */
+            if (isKnowledgeQuestion(text)) {
 
-            try {
-
-                if (typeof KnowledgeEngineV2 !== "undefined" && KnowledgeEngineV2.resolve) {
+                if (typeof KnowledgeEngineV2 !== "undefined") {
 
                     var cleaned = text
                         .replace("क्या है", "")
+                        .replace("क्या होता है", "")
                         .replace("कौन है", "")
                         .replace("कहाँ है", "")
                         .replace("कहां है", "")
-                        .replace("क्या होता है", "")
-                        .replace("बताओ", "")
-                        .replace("समझाओ", "")
-                        .replace(/\?/g, "")
+                        .replace("?", "")
                         .trim();
 
                     var knowledge =
                         await KnowledgeEngineV2.resolve(cleaned) ||
                         await KnowledgeEngineV2.resolve(text);
 
-                    /* ⭐ DIRECT RETURN — NO LANGUAGE PROCESSING */
-                    if (knowledge && knowledge.length > 20) {
-                        return knowledge;
+                    if (knowledge) {
+                        return knowledge;   // DIRECT RETURN
                     }
                 }
-
-            } catch (e) {
-                console.log("Knowledge error:", e);
             }
 
-            /* ================= Emotion Layer ================= */
-
-            try {
-                if (typeof EmotionEngineV2 !== "undefined" && EmotionEngineV2.detect) {
-
-                    var emoType = EmotionEngineV2.detect(text);
-
-                    if (emoType) {
-                        context = makeContext("emotion", emoType);
-                        baseReply = "emotion";
-                    }
+            /* Emotion */
+            if (typeof EmotionEngineV2 !== "undefined") {
+                var emoType = EmotionEngineV2.detect(text);
+                if (emoType) {
+                    context = makeContext("emotion", emoType);
+                    baseReply = "emotion";
                 }
-            } catch (e) {
-                console.log("Emotion error:", e);
             }
 
-            /* ================= Intelligence Layer ================= */
-
-            try {
-                if (!baseReply &&
-                    typeof IntelligenceEngineV2 !== "undefined" &&
-                    IntelligenceEngineV2.respond) {
-
-                    var intel = IntelligenceEngineV2.respond(text, "");
-
-                    if (intel) {
-                        context = makeContext("intelligence", null);
-                        baseReply = intel;
-                    }
+            /* Intelligence */
+            if (!baseReply && typeof IntelligenceEngineV2 !== "undefined") {
+                var intel = IntelligenceEngineV2.respond(text, "");
+                if (intel) {
+                    context = makeContext("intelligence", null);
+                    baseReply = intel;
                 }
-            } catch (e) {
-                console.log("Intelligence error:", e);
             }
 
-            /* ================= Name Detection ================= */
-
-            try {
-                if (!baseReply) {
-                    var name = detectName(text);
-                    if (name) {
-                        context = makeContext("name", null);
-                        baseReply = "अच्छा… तो तुम्हारा नाम " + name + " है।";
-                    }
+            /* Name */
+            if (!baseReply) {
+                var name = detectName(text);
+                if (name) {
+                    context = makeContext("name", null);
+                    baseReply = "अच्छा… तो तुम्हारा नाम " + name + " है।";
                 }
-            } catch (e) {
-                console.log("Name detect error:", e);
             }
 
-            /* ================= Final Fallback ================= */
-
+            /* Fallback */
             if (!baseReply) {
                 baseReply = "normal";
             }
 
-            /* ================= Language Polish ================= */
-
-            try {
-                if (typeof LanguageEngineV2 !== "undefined" && LanguageEngineV2.transform) {
-                    return LanguageEngineV2.transform(baseReply, context);
-                }
-            } catch (e) {
-                console.log("Language error:", e);
+            /* Language polish */
+            if (typeof LanguageEngineV2 !== "undefined") {
+                return LanguageEngineV2.transform(baseReply, context);
             }
 
             return baseReply;
