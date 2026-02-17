@@ -1,7 +1,6 @@
 /* ======================================
-   ANJALI BRAIN v2 — UNIVERSAL KNOWLEDGE MODE
-   Knowledge → Emotion → Intelligence → Name
-   Strong Universal Detection
+   ANJALI BRAIN v2 — LOCKED BUILD
+   Universal Knowledge + Selector + Thinking
    ====================================== */
 
 var BrainV2 = (function () {
@@ -13,18 +12,16 @@ var BrainV2 = (function () {
         };
     }
 
-    /* ---------- UNIVERSAL KNOWLEDGE DETECTOR ---------- */
+    /* ---------- UNIVERSAL QUESTION DETECTOR ---------- */
     function isKnowledgeQuery(text) {
 
         text = (text || "").toLowerCase().trim();
 
-        // बहुत छोटे शब्द = topic
-        if (text.split(" ").length <= 2 && text.length > 2) {
+        if (text.split(" ").length <= 3 && text.length > 2) {
             return true;
         }
 
-        // Question markers
-        if (
+        return (
             text.includes("?") ||
             text.includes("क्या") ||
             text.includes("कौन") ||
@@ -39,16 +36,26 @@ var BrainV2 = (function () {
             text.includes("संख्या") ||
             text.includes("अर्थ") ||
             text.includes("परिभाषा") ||
-            text.includes("बताओ") ||
-            text.includes("समझाओ")
-        ) {
-            return true;
-        }
-
-        return false;
+            text.includes("राजधानी")
+        );
     }
 
-    /* ---------- Name Detection ---------- */
+    /* ---------- CLEAN QUERY ---------- */
+    function cleanQuery(text) {
+        return (text || "")
+            .replace("क्या है", "")
+            .replace("क्या होता है", "")
+            .replace("कौन है", "")
+            .replace("कहाँ है", "")
+            .replace("कहां है", "")
+            .replace("कब हुआ", "")
+            .replace("कब हुई", "")
+            .replace("कब", "")
+            .replace("?", "")
+            .trim();
+    }
+
+    /* ---------- NAME DETECTION ---------- */
     function detectName(text) {
 
         text = (text || "").trim();
@@ -71,7 +78,7 @@ var BrainV2 = (function () {
         return null;
     }
 
-    /* ---------- MAIN RESPONSE ENGINE ---------- */
+    /* ---------- MAIN RESPONSE ---------- */
     async function respond(userText) {
 
         try {
@@ -80,28 +87,24 @@ var BrainV2 = (function () {
             var context = makeContext("normal", null);
             var baseReply = "";
 
-            /* 🔥 1️⃣ UNIVERSAL KNOWLEDGE FIRST */
+            /* 🔥 1️⃣ KNOWLEDGE MODE */
             try {
 
                 if (isKnowledgeQuery(text) && typeof KnowledgeEngineV2 !== "undefined") {
 
-                    var cleaned = text
-                        .replace("क्या है", "")
-                        .replace("कौन है", "")
-                        .replace("कहाँ है", "")
-                        .replace("कहां है", "")
-                        .replace("क्या होता है", "")
-                        .replace("बताओ", "")
-                        .replace("समझाओ", "")
-                        .replace("?", "")
-                        .trim();
+                    var cleaned = cleanQuery(text);
 
                     var knowledge =
                         await KnowledgeEngineV2.resolve(cleaned) ||
                         await KnowledgeEngineV2.resolve(text);
 
                     if (knowledge) {
-                        return knowledge;   // ⭐ Direct return
+
+                        if (typeof LanguageThinkingEngineV2 !== "undefined") {
+                            return LanguageThinkingEngineV2.transform(knowledge, text);
+                        }
+
+                        return knowledge;
                     }
                 }
 
@@ -120,9 +123,7 @@ var BrainV2 = (function () {
                         baseReply = "emotion";
                     }
                 }
-            } catch (e) {
-                console.log("Emotion error:", e);
-            }
+            } catch (e) {}
 
             /* 3️⃣ Intelligence */
             try {
@@ -130,28 +131,19 @@ var BrainV2 = (function () {
 
                     var intel = IntelligenceEngineV2.respond(text, "");
 
-if (intel) {
+                    if (intel) {
                         context = makeContext("intelligence", null);
                         baseReply = intel;
                     }
                 }
-            } catch (e) {
-                console.log("Intelligence error:", e);
-            }
+            } catch (e) {}
 
             /* 4️⃣ Name */
-            try {
-                if (!baseReply) {
-
-                    var name = detectName(text);
-
-                    if (name) {
-                        context = makeContext("name", null);
-                        baseReply = "अच्छा… तो तुम्हारा नाम " + name + " है।";
-                    }
+            if (!baseReply) {
+                var name = detectName(text);
+                if (name) {
+                    baseReply = "अच्छा… तो तुम्हारा नाम " + name + " है।";
                 }
-            } catch (e) {
-                console.log("Name error:", e);
             }
 
             /* 5️⃣ Fallback */
