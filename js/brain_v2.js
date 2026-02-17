@@ -1,6 +1,6 @@
 /* ======================================
-   ANJALI BRAIN v2 — LOCKED BUILD + SELECTOR
-   Universal Knowledge + Answer Selection + Thinking
+   ANJALI BRAIN v2 — FINAL STABLE LOCKED
+   Universal Knowledge + Selector + Thinking + Extractor
    ====================================== */
 
 var BrainV2 = (function () {
@@ -36,7 +36,9 @@ var BrainV2 = (function () {
             text.includes("संख्या") ||
             text.includes("अर्थ") ||
             text.includes("परिभाषा") ||
-            text.includes("राजधानी")
+            text.includes("राजधानी") ||
+            text.includes("स्थापना") ||
+            text.includes("लागू")
         );
     }
 
@@ -51,6 +53,7 @@ var BrainV2 = (function () {
             .replace("कब हुआ", "")
             .replace("कब हुई", "")
             .replace("कब", "")
+            .replace("किसने", "")
             .replace("?", "")
             .trim();
     }
@@ -78,6 +81,13 @@ var BrainV2 = (function () {
         return null;
     }
 
+    /* ---------- YEAR EXTRACTOR ---------- */
+    function extractYear(text) {
+        var match = text.match(/\d{3,4}/);
+        if (match) return match[0];
+        return null;
+    }
+
     /* ---------- MAIN RESPONSE ---------- */
     async function respond(userText) {
 
@@ -100,12 +110,28 @@ var BrainV2 = (function () {
 
                     if (knowledge) {
 
-                        // ⭐ BEST LINE SELECTOR (NEW)
+                        /* ⭐ BEST LINE SELECTOR */
                         if (typeof AnswerSelectorEngineV2 !== "undefined") {
                             knowledge = AnswerSelectorEngineV2.pickBest(knowledge, text);
                         }
 
-                        // ⭐ THINKING ENGINE
+                        /* ⭐ YEAR QUESTION FIX */
+                        if (text.includes("कब")) {
+                            var year = extractYear(knowledge);
+                            if (year) {
+                                knowledge = "यह घटना लगभग " + year + " के आसपास हुई थी।";
+                            }
+                        }
+
+                        /* ⭐ WHO QUESTION FIX */
+                        if (text.includes("कौन")) {
+                            var firstLine = knowledge.split("।")[0];
+                            if (firstLine.length > 10) {
+                                knowledge = firstLine + "।";
+                            }
+                        }
+
+                        /* ⭐ THINKING ENGINE */
                         if (typeof LanguageThinkingEngineV2 !== "undefined") {
                             return LanguageThinkingEngineV2.transform(knowledge, text);
                         }
