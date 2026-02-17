@@ -1,6 +1,6 @@
 /* ======================================
-   ANJALI KNOWLEDGE ENGINE v2 — DEEP FIX
-   Strong Topic Detection + Fallback Search
+   ANJALI KNOWLEDGE ENGINE v2 — FINAL STABLE
+   Strong Topic Detection + Multi Fallback
    Wikipedia Powered
    ====================================== */
 
@@ -8,7 +8,7 @@ var KnowledgeEngineV2 = (function () {
 
     const API = "https://hi.wikipedia.org/api/rest_v1/page/summary/";
 
-    /* ---------- Normalize Text ---------- */
+    /* ---------- Normalize ---------- */
     function normalize(text) {
         return (text || "")
             .toLowerCase()
@@ -47,15 +47,22 @@ var KnowledgeEngineV2 = (function () {
         try {
 
             let topic = guessTopic(topicText);
+
             if (!topic) return null;
+
+            console.log("Searching Wiki for:", topic);
 
             let res = await fetch(API + encodeURIComponent(topic));
 
-            if (!res.ok) return null;
+            if (!res.ok) {
+                console.log("Wiki not found:", topic);
+                return null;
+            }
 
             let data = await res.json();
 
             if (data && data.extract) {
+                console.log("Wiki FOUND:", topic);
                 return data.extract;
             }
 
@@ -72,12 +79,13 @@ var KnowledgeEngineV2 = (function () {
 
         let topic = guessTopic(text);
 
-        /* 1️⃣ Try full topic */
+        /* 1️⃣ Full topic */
         let info = await search(topic);
         if (info) return info;
 
-        /* 2️⃣ Try first word fallback */
+        /* 2️⃣ First word fallback */
         let firstWord = topic.split(" ")[0];
+
         if (firstWord.length > 2) {
             info = await search(firstWord);
             if (info) return info;
