@@ -1,8 +1,14 @@
+/* ======================================
+   ANJALI KNOWLEDGE ENGINE v2 — FINAL STABLE
+   Wikipedia Summary + Smart Search + Learning Cache
+   ====================================== */
+
 var KnowledgeEngineV2 = (function () {
 
     const API_SUMMARY = "https://hi.wikipedia.org/api/rest_v1/page/summary/";
     const API_SEARCH = "https://hi.wikipedia.org/w/api.php?action=query&list=search&srsearch=";
 
+    /* ---------- Normalize ---------- */
     function normalize(text) {
         return (text || "")
             .toLowerCase()
@@ -12,6 +18,7 @@ var KnowledgeEngineV2 = (function () {
             .trim();
     }
 
+    /* ---------- Clean Topic ---------- */
     function cleanTopic(text) {
         return normalize(text)
             .replace("क्या है", "")
@@ -40,7 +47,8 @@ var KnowledgeEngineV2 = (function () {
             if (data && data.extract) return data.extract;
 
             return null;
-        } catch {
+        } catch (e) {
+            console.log("Summary fetch error:", e);
             return null;
         }
     }
@@ -48,7 +56,11 @@ var KnowledgeEngineV2 = (function () {
     /* ---------- SEARCH FALLBACK ---------- */
     async function searchTopic(text) {
         try {
-            let url = API_SEARCH + encodeURIComponent(text) + "&format=json&origin=*";
+            let url =
+                API_SEARCH +
+                encodeURIComponent(text) +
+                "&format=json&origin=*";
+
             let res = await fetch(url);
             if (!res.ok) return null;
 
@@ -63,35 +75,64 @@ var KnowledgeEngineV2 = (function () {
             }
 
             return null;
-        } catch {
+        } catch (e) {
+            console.log("Search error:", e);
             return null;
         }
     }
 
-    /* ---------- DEEP RESOLVE ---------- */
+    /* ---------- MAIN RESOLVE ---------- */
     async function resolve(text) {
 
-        let topic = guessTopic(text);
+        try {
 
-        /* 1️⃣ Direct summary */
-        let info = await fetchSummary(topic);
-        if (info) return info;
+            let topic = guessTopic(text);
 
-        /* 2️⃣ Search Wikipedia for best title */
-        let bestTitle = await searchTopic(topic);
-        if (bestTitle) {
-            info = await fetchSummary(bestTitle);
-            if (info) return info;
+            /* 0️⃣ Learning cache check */
+            if (typeof LearningEngineV2 !== "undefined" && LearningEngineV2.get) {
+                let cached = LearningEngineV2.get(topic);
+                if (cached) return cached;
+            }
+
+            /* 1️⃣ Direct summary */
+            let info = await fetchSummary(topic);
+            if (info) {
+                if (typeof LearningEngineV2 !== "undefined" && LearningEngineV2.set) {
+                    LearningEngineV2.set(topic, info);
+                }
+                return info;
+            }
+
+            /* 2️⃣ Wikipedia search */
+            let bestTitle = await searchTopic(topic);
+            if (bestTitle) {
+                info = await fetchSummary(bestTitle);
+                if (info) {
+                    if (typeof LearningEngineV2 !== "undefined" && LearningEngineV2.set) {
+                        LearningEngineV2.set(topic, info);
+                    }
+                    return info;
+                }
+            }
+
+            /* 3️⃣ First word fallback */
+            let first = topic.split(" ")[0];
+            if (first.length > 2) {
+                info = await fetchSummary(first);
+                if (info) {
+                    if (typeof LearningEngineV2 !== "undefined" && LearningEngineV2.set) {
+                        LearningEngineV2.set(topic, info);
+                    }
+                    return info;
+                }
+            }
+
+            return null;
+
+        } catch (e) {
+            console.log("Knowledge resolve error:", e);
+            return null;
         }
-
-        /* 3️⃣ Try first word */
-        let first = topic.split(" ")[0];
-        if (first.length > 2) {
-            info = await fetchSummary(first);
-            if (info) return info;
-        }
-
-        return null;
     }
 
     return {
