@@ -1,6 +1,7 @@
 /* ======================================
-   ANJALI BRAIN v2 — FINAL WORKING VERSION
-   Knowledge FIRST → Emotion → Intelligence → Name → Normal
+   ANJALI BRAIN v2 — UNIVERSAL KNOWLEDGE MODE
+   Knowledge → Emotion → Intelligence → Name
+   Strong Universal Detection
    ====================================== */
 
 var BrainV2 = (function () {
@@ -12,11 +13,17 @@ var BrainV2 = (function () {
         };
     }
 
-    /* ---------- UNIVERSAL QUESTION DETECTOR ---------- */
+    /* ---------- UNIVERSAL KNOWLEDGE DETECTOR ---------- */
     function isKnowledgeQuery(text) {
 
         text = (text || "").toLowerCase().trim();
 
+        // बहुत छोटे शब्द = topic
+        if (text.split(" ").length <= 2 && text.length > 2) {
+            return true;
+        }
+
+        // Question markers
         if (
             text.includes("?") ||
             text.includes("क्या") ||
@@ -28,22 +35,20 @@ var BrainV2 = (function () {
             text.includes("कैसे") ||
             text.includes("कितना") ||
             text.includes("कितने") ||
+            text.includes("कितनी") ||
             text.includes("संख्या") ||
             text.includes("अर्थ") ||
-            text.includes("परिभाषा")
+            text.includes("परिभाषा") ||
+            text.includes("बताओ") ||
+            text.includes("समझाओ")
         ) {
-            return true;
-        }
-
-        // 1–2 शब्द = topic
-        if (text.split(" ").length <= 2 && text.length > 2) {
             return true;
         }
 
         return false;
     }
 
-    /* ---------- NAME DETECT ---------- */
+    /* ---------- Name Detection ---------- */
     function detectName(text) {
 
         text = (text || "").trim();
@@ -66,32 +71,37 @@ var BrainV2 = (function () {
         return null;
     }
 
-    /* ---------- MAIN RESPONSE ---------- */
+    /* ---------- MAIN RESPONSE ENGINE ---------- */
     async function respond(userText) {
 
         try {
 
             var text = (userText || "").toString();
             var context = makeContext("normal", null);
+            var baseReply = "";
 
-            /* =========================
-               1️⃣ KNOWLEDGE — ALWAYS FIRST
-               ========================= */
-
+            /* 🔥 1️⃣ UNIVERSAL KNOWLEDGE FIRST */
             try {
 
-                if (typeof KnowledgeEngineV2 !== "undefined" && isKnowledgeQuery(text)) {
+                if (isKnowledgeQuery(text) && typeof KnowledgeEngineV2 !== "undefined") {
 
-                    var knowledge = await KnowledgeEngineV2.resolve(text);
+                    var cleaned = text
+                        .replace("क्या है", "")
+                        .replace("कौन है", "")
+                        .replace("कहाँ है", "")
+                        .replace("कहां है", "")
+                        .replace("क्या होता है", "")
+                        .replace("बताओ", "")
+                        .replace("समझाओ", "")
+                        .replace("?", "")
+                        .trim();
 
-                    if (knowledge && knowledge.length > 30) {
+                    var knowledge =
+                        await KnowledgeEngineV2.resolve(cleaned) ||
+                        await KnowledgeEngineV2.resolve(text);
 
-                        // Language thinking apply
-                        if (typeof LanguageThinkingEngineV2 !== "undefined") {
-                            return LanguageThinkingEngineV2.transform(knowledge, text);
-                        }
-
-                        return knowledge;
+                    if (knowledge) {
+                        return knowledge;   // ⭐ Direct return
                     }
                 }
 
@@ -99,10 +109,7 @@ var BrainV2 = (function () {
                 console.log("Knowledge error:", e);
             }
 
-            /* =========================
-               2️⃣ EMOTION
-               ========================= */
-
+            /* 2️⃣ Emotion */
             try {
                 if (typeof EmotionEngineV2 !== "undefined") {
 
@@ -110,45 +117,54 @@ var BrainV2 = (function () {
 
                     if (emoType) {
                         context = makeContext("emotion", emoType);
-                        return LanguageEngineV2.transform("emotion", context);
+                        baseReply = "emotion";
                     }
                 }
-            } catch (e) {}
+            } catch (e) {
+                console.log("Emotion error:", e);
+            }
 
-            /* =========================
-               3️⃣ INTELLIGENCE
-               ========================= */
-
+            /* 3️⃣ Intelligence */
             try {
-                if (typeof IntelligenceEngineV2 !== "undefined") {
+                if (!baseReply && typeof IntelligenceEngineV2 !== "undefined") {
 
                     var intel = IntelligenceEngineV2.respond(text, "");
 
-                    if (intel) {
+if (intel) {
                         context = makeContext("intelligence", null);
-                        return LanguageEngineV2.transform(intel, context);
+                        baseReply = intel;
                     }
                 }
-            } catch (e) {}
-
-            /* =========================
-               4️⃣ NAME
-               ========================= */
-
-            var name = detectName(text);
-            if (name) {
-                return "अच्छा… तो तुम्हारा नाम " + name + " है।";
+            } catch (e) {
+                console.log("Intelligence error:", e);
             }
 
-            /* =========================
-               5️⃣ FINAL FALLBACK
-               ========================= */
+            /* 4️⃣ Name */
+            try {
+                if (!baseReply) {
 
+                    var name = detectName(text);
+
+                    if (name) {
+                        context = makeContext("name", null);
+                        baseReply = "अच्छा… तो तुम्हारा नाम " + name + " है।";
+                    }
+                }
+            } catch (e) {
+                console.log("Name error:", e);
+            }
+
+            /* 5️⃣ Fallback */
+            if (!baseReply) {
+                baseReply = "normal";
+            }
+
+            /* 6️⃣ Language polish */
             if (typeof LanguageEngineV2 !== "undefined") {
-                return LanguageEngineV2.transform("normal", context);
+                return LanguageEngineV2.transform(baseReply, context);
             }
 
-            return "मैं सुन रही हूँ…";
+            return baseReply;
 
         } catch (mainError) {
             console.log("Brain crash:", mainError);
