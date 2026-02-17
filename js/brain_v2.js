@@ -1,6 +1,6 @@
 /* ======================================
-   ANJALI BRAIN v2 — LOCKED BUILD
-   Universal Knowledge + Selector + Thinking
+   ANJALI BRAIN v2 — LOCKED BUILD + SELECTOR
+   Universal Knowledge + Answer Selection + Thinking
    ====================================== */
 
 var BrainV2 = (function () {
@@ -100,6 +100,12 @@ var BrainV2 = (function () {
 
                     if (knowledge) {
 
+                        // ⭐ BEST LINE SELECTOR (NEW)
+                        if (typeof AnswerSelectorEngineV2 !== "undefined") {
+                            knowledge = AnswerSelectorEngineV2.pickBest(knowledge, text);
+                        }
+
+                        // ⭐ THINKING ENGINE
                         if (typeof LanguageThinkingEngineV2 !== "undefined") {
                             return LanguageThinkingEngineV2.transform(knowledge, text);
                         }
