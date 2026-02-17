@@ -1,6 +1,7 @@
 /* ======================================
-   ANJALI INTENT ENGINE v2 — FINAL FIX
+   ANJALI INTENT ENGINE v2 — FINAL STABLE
    LEVEL 4 Understanding Layer
+   Knowledge + Topic + Emotion + Advice + Identity
    ====================================== */
 
 var IntentEngineV2 = (function () {
@@ -9,24 +10,9 @@ var IntentEngineV2 = (function () {
 
         text = (text || "").toLowerCase().trim();
 
-        /* ---------- Knowledge Intent ---------- */
-        if (
-            text.includes("क्या है") ||
-            text.includes("कौन है") ||
-            text.includes("कहाँ है") ||
-            text.includes("कहां है") ||
-            text.includes("कौन हो") ||
-            text.includes("क्यों") ||
-            text.includes("कैसे") ||
-            text.includes("?")
-        ) return "knowledge_intent";
+        if (!text) return "normal";
 
-        /* ---------- Topic Only (Single word / short text) ---------- */
-        if (text.split(" ").length <= 2 && text.length > 2) {
-            return "topic_intent";
-        }
-
-        /* ---------- Emotion Intent ---------- */
+        /* ---------- 1️⃣ Emotion Intent (FIRST) ---------- */
         if (
             text.includes("उदास") ||
             text.includes("दुखी") ||
@@ -36,13 +22,13 @@ var IntentEngineV2 = (function () {
             text.includes("परेशान")
         ) return "emotion_intent";
 
-        /* ---------- Love Intent ---------- */
+        /* ---------- 2️⃣ Love Intent ---------- */
         if (
             text.includes("प्यार") ||
             text.includes("love")
         ) return "love_intent";
 
-        /* ---------- Advice Intent ---------- */
+        /* ---------- 3️⃣ Advice Intent ---------- */
         if (
             text.includes("क्या करूँ") ||
             text.includes("कैसे करूँ") ||
@@ -50,11 +36,30 @@ var IntentEngineV2 = (function () {
             text.includes("help")
         ) return "advice_intent";
 
-        /* ---------- Identity Intent ---------- */
+        /* ---------- 4️⃣ Identity Intent ---------- */
         if (
             text.includes("मेरा नाम") ||
-            text.includes("मैं ") && text.includes("हूँ")
+            (text.includes("मैं") && text.includes("हूँ"))
         ) return "identity_intent";
+
+        /* ---------- 5️⃣ Knowledge Question ---------- */
+        if (
+            text.includes("क्या है") ||
+            text.includes("क्या होता है") ||
+            text.includes("कौन है") ||
+            text.includes("कहाँ है") ||
+            text.includes("कहां है") ||
+            text.includes("क्यों") ||
+            text.includes("कैसे") ||
+            text.includes("?")
+        ) return "knowledge_intent";
+
+        /* ---------- 6️⃣ Topic Only (Single/Short word) ---------- */
+        let words = text.split(" ").filter(w => w.length > 0);
+
+        if (words.length <= 2 && text.length > 2) {
+            return "topic_intent";
+        }
 
         return "normal";
     }
