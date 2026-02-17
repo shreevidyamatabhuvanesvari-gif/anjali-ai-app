@@ -1,7 +1,7 @@
 /* ======================================
-   ANJALI MEMORY v2
-   Identity + Mood + Interest + Personality Base
-   Level 2 (Advanced) + Level 3 Ready
+   ANJALI MEMORY v2 — STABLE CORE
+   Identity + Mood + Interests + Topics
+   Research Safe Version
    ====================================== */
 
 var MemoryEngineV2 = (function () {
@@ -20,19 +20,25 @@ var MemoryEngineV2 = (function () {
         createdAt: new Date().toISOString()
     };
 
-    /* ---------- Load Memory ---------- */
+    /* ---------- Safe Load ---------- */
     function load() {
         try {
             var saved = localStorage.getItem(STORAGE_KEY);
+
             if (saved) {
-                data = JSON.parse(saved);
+                var parsed = JSON.parse(saved);
+
+                if (parsed && typeof parsed === "object") {
+                    data = parsed;
+                }
             }
+
         } catch (e) {
             console.log("Memory load error:", e);
         }
     }
 
-    /* ---------- Save Memory ---------- */
+    /* ---------- Safe Save ---------- */
     function save() {
         try {
             localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
@@ -45,7 +51,14 @@ var MemoryEngineV2 = (function () {
     function setName(name) {
         if (!name) return;
 
-        data.name = name.trim();
+        name = name
+            .replace("मेरा नाम", "")
+            .replace("है", "")
+            .trim();
+
+        if (name.length < 2) return;
+
+        data.name = name;
         save();
     }
 
@@ -59,7 +72,7 @@ var MemoryEngineV2 = (function () {
 
     /* ---------- Call Prefix ---------- */
     function getCallPrefix() {
-        if (data.name && data.name.length > 0) {
+        if (data.name) {
             return data.name + "… सुनो ";
         }
         return "सुनो… ";
@@ -80,8 +93,11 @@ var MemoryEngineV2 = (function () {
             data.moods.shift();
         }
 
-        // attachment growth
+        /* Attachment Growth (capped) */
         data.attachmentLevel += 0.1;
+        if (data.attachmentLevel > 100) {
+            data.attachmentLevel = 100;
+        }
 
         save();
     }
@@ -90,11 +106,13 @@ var MemoryEngineV2 = (function () {
         return data.lastMood || "";
     }
 
-    /* ---------- Interest System ---------- */
+    /* ---------- Interests ---------- */
     function addInterest(topic) {
         if (!topic) return;
 
         topic = topic.trim();
+
+        if (topic.length < 2) return;
 
         if (data.interests.indexOf(topic) === -1) {
             data.interests.push(topic);
@@ -109,6 +127,12 @@ var MemoryEngineV2 = (function () {
     /* ---------- Topic Tracking ---------- */
     function addTopic(topic) {
         if (!topic) return;
+
+        topic = topic.trim();
+
+        /* avoid recent duplicate */
+        var last = data.topics[data.topics.length - 1];
+        if (last && last.text === topic) return;
 
         data.topics.push({
             text: topic,
@@ -131,13 +155,13 @@ var MemoryEngineV2 = (function () {
         return data.attachmentLevel || 0;
     }
 
-    /* ---------- Reset Memory ---------- */
+    /* ---------- Reset ---------- */
     function reset() {
         localStorage.removeItem(STORAGE_KEY);
         location.reload();
     }
 
-    /* ---------- Initial Load ---------- */
+    /* ---------- Init ---------- */
     load();
 
     /* ---------- Public API ---------- */
